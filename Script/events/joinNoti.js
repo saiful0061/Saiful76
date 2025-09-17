@@ -1,7 +1,7 @@
 module.exports.config = {
   name: "joinnoti",
   eventType: ["log:subscribe"],
-  version: "1.0.2",
+  version: "1.0.4",
   credits: "𝐒𝐡𝐚𝐡𝐚𝐝𝐚𝐭 𝐈𝐬𝐥𝐚𝐦",
   description: "Welcome message with optional image/video",
   dependencies: {
@@ -23,29 +23,22 @@ module.exports.onLoad = function () {
 };
 
 module.exports.run = async function({ api, event }) {
-  const fs = require("fs");
-  const path = require("path");
   const { threadID } = event;
-  
   const botPrefix = global.config.PREFIX || "/";
-  const botName = global.config.BOTNAME || "𝑺𝑨𝑰𝑭𝑼𝑳  𝗖𝗵𝗮𝘁 𝗕𝗼𝘁";
+  const botName = global.config.BOTNAME || "𝗦𝗵𝗮𝐡𝗮𝗱𝐚𝐭 𝗖𝗵𝗮𝐭 𝗕𝗼𝘁";
 
- 
+  // === বটকে গ্রুপে অ্যাড করলে ===
   if (event.logMessageData.addedParticipants.some(i => i.userFbId == api.getCurrentUserID())) {
     await api.changeNickname(`[ ${botPrefix} ] • ${botName}`, threadID, api.getCurrentUserID());
 
-    api.sendMessage("চ্ঁলে্ঁ এ্ঁসে্ঁছি্ঁ 𝑺𝑨𝑰𝑭𝑼𝑳  𝐂𝐡𝐚𝐭 𝐁𝐨𝐭 এঁখঁনঁ তোঁমাঁদেঁরঁ সাঁথেঁ আঁড্ডাঁ দিঁবঁ..!", threadID, () => {
-      const randomGifPath = path.join(__dirname, "cache", "randomgif");
-      const allFiles = fs.readdirSync(randomGifPath).filter(file =>
-        [".mp4", ".jpg", ".png", ".jpeg", ".gif", ".mp3"].some(ext => file.endsWith(ext))
-      );
+    const botMediaLink = "https://i.imgur.com/t239z0g.gif"; // এখানে Imgur লিংক বসানো হলো
 
-      const selected = allFiles.length > 0 
-        ? fs.createReadStream(path.join(randomGifPath, allFiles[Math.floor(Math.random() * allFiles.length)])) 
-        : null;
-
-      const messageBody = `╭•┄┅═══❁🌺❁═══┅┄•╮
-     আ্ঁস্ঁসা্ঁলা্ঁমু্ঁ💚আ্ঁলা্ঁই্ঁকু্ঁম্ঁ
+    api.sendMessage(
+      "চ্ঁলে্ঁ এ্ঁসে্ঁছি্ঁ 𝐂𝐡𝐚𝐭 𝐁𝐨𝐓 𝐛𝐲 Saiful এঁখঁনঁ তোঁমাঁদেঁরঁ সাঁথেঁ আঁড্ডাঁ দিঁবঁ..!",
+      threadID,
+      () => {
+        const messageBody = `╭•┄┅═══❁🌺❁═══┅┄•╮
+আসসালামু আলাইকুম💚
 ╰•┄┅═══❁🌺❁═══┅┄•╯
 
 𝐓𝐡𝐚𝐧𝐤 𝐲𝐨𝐮 𝐬𝐨 𝐦𝐮𝐜𝐡 𝐟𝐨𝐫 𝐚𝐝𝐝𝐢𝐧𝐠 𝐦𝐞 𝐭𝐨 𝐲𝐨𝐮𝐫 𝐢-𝐠𝐫𝐨𝐮𝐩-🖤🤗
@@ -56,28 +49,29 @@ ${botPrefix}Help
 ${botPrefix}Info
 ${botPrefix}Admin
 
-★ যেকোনো অভিযোগ অথবা হেল্প এর জন্য এডমিন 𝑺𝑨𝑰𝑭𝑼𝑳 𝑰𝑺𝑳𝑨𝑴 কে নক করতে পারেন ★
-➤𝐌𝐞𝐬𝐬𝐞𝐧𝐠𝐞𝐫: https://m.me/61577052283173
+★ যেকোনো অভিযোগ অথবা হেল্প এর জন্য এডমিন 𝙎𝙄𝙁𝙐𝙇   𝙄𝙎𝙇𝘼𝙈 কে নক করতে পারেন ★
+➤𝐌𝐞𝐬𝐬𝐞𝐧𝐠𝐞𝐫: https://www.facebook.com/profile.php?id=61577052283173
+➤𝐖𝐡𝐚𝐭𝐬𝐀𝐩𝐩: https://wa.me/01833225797
 
 ❖⋆═══════════════════════⋆❖
-          𝐁𝐨𝐭 𝐎𝐰𝐧𝐞𝐫 ➢ 𝑺𝑨𝑰𝑭𝑼𝑳 𝑰𝑺𝑳𝑨𝑴`;
+          𝐁𝐨𝐭 𝐎𝐰𝐧𝐞𝐫 ➢ 𝙎𝙄𝙁𝙐𝙇   𝙄𝙎𝙇𝘼𝙈`;
 
-      if (selected) {
-        api.sendMessage({ body: messageBody, attachment: selected }, threadID);
-      } else {
-        api.sendMessage(messageBody, threadID);
+        api.sendMessage({ body: messageBody, attachment: botMediaLink }, threadID);
       }
-    });
+    );
 
     return;
   }
 
- 
+  // === মেম্বার অ্যাড হলে ===
   try {
-    const { createReadStream, readdirSync } = global.nodemodule["fs-extra"];
-    let { threadName, participantIDs } = await api.getThreadInfo(threadID);
+    const { threadName, participantIDs } = await api.getThreadInfo(threadID);
     const threadData = global.data.threadData.get(parseInt(threadID)) || {};
     let mentions = [], nameArray = [], memLength = [], i = 0;
+
+    const authorID = event.author;
+    const authorInfo = await api.getUserInfo(authorID);
+    const authorName = authorInfo[authorID].name;
 
     for (let id in event.logMessageData.addedParticipants) {
       const userName = event.logMessageData.addedParticipants[id].fullName;
@@ -87,27 +81,28 @@ ${botPrefix}Admin
     }
     memLength.sort((a, b) => a - b);
 
-    let msg = (typeof threadData.customJoin === "undefined") ? `╭•┄┅═══❁🌺❁═══┅┄•╮
-     আ্ঁস্ঁসা্ঁলা্ঁমু্ঁ💚আ্ঁলা্ঁই্ঁকু্ঁম্ঁ
-╰•┄┅═══❁🌺❁═══┅┄•╯
-হাসি, মজা, ঠাট্টায় গড়ে উঠুক  
-চিরস্থায়ী বন্ধুত্বের বন্ধন।🥰
-ভালোবাসা ও সম্পর্ক থাকুক আজীবন।💝
+    let msg = (typeof threadData.customJoin === "undefined") ?
+`╭•┄┅══❁🌺❁══┅•╮
+আসসালামু আলাইকুম💚
+╰•┄┅══❁🌺❁══┅•╯
 
-➤ আশা করি আপনি এখানে হাসি-মজা করে 
-আড্ডা দিতে ভালোবাসবেন।😍
-➤ সবার সাথে মিলেমিশে থাকবেন।😉
-➤ উস্কানিমূলক কথা বা খারাপ ব্যবহার করবেন না।🚫
-➤ গ্রুপ এডমিনের কথা শুনবেন ও রুলস মেনে চলবেন।✅
+🥰 হাসি-ঠাট্টায় গড়ে উঠুক বন্ধুত্ব,  
+💝 ভালোবাসা থাকুক আজীবন।  
+
+➤ হাসি-মজা করে আড্ডা দিন।  
+➤ সবার সাথে মিলেমিশে থাকুন।  
+➤ খারাপ ব্যবহার ❌ নয়।  
+➤ এডমিনের কথা শুনুন।✅  
 
 ›› প্রিয় {name},  
-আপনি এই গ্রুপের {soThanhVien} নম্বর মেম্বার!
+আপনি এই গ্রুপের {soThanhVien} নম্বর মেম্বার!  
+➤ Added By : {authorMention}
 
 ›› গ্রুপ: {threadName}
 
 💌 🌺 𝐖 𝐄 𝐋 𝐂 𝐎 𝐌 𝐄 🌺 💌
 ╭─╼╾─╼🌸╾─╼╾───╮
-   ◈━━━✿ SAIFUL ISLAM ✿━━━◈
+   ─꯭─⃝‌‌BOT 𝙎𝙄𝙁𝙐𝙇   𝙄𝙎𝙇𝘼𝙈 🌺
 ╰───╼╾─╼🌸╾─╼╾─╯
 
 ❖⋆══════════════════════════⋆❖` : threadData.customJoin;
@@ -115,18 +110,15 @@ ${botPrefix}Admin
     msg = msg
       .replace(/\{name}/g, nameArray.join(', '))
       .replace(/\{soThanhVien}/g, memLength.join(', '))
-      .replace(/\{threadName}/g, threadName);
+      .replace(/\{threadName}/g, threadName)
+      .replace(/\{authorMention}/g, `@${authorName}`);
 
-    const joinGifPath = path.join(__dirname, "cache", "joinGif");
-    const files = readdirSync(joinGifPath).filter(file =>
-      [".mp4", ".jpg", ".png", ".jpeg", ".gif", ".mp3"].some(ext => file.endsWith(ext))
-    );
-    const randomFile = files.length > 0 
-      ? createReadStream(path.join(joinGifPath, files[Math.floor(Math.random() * files.length)])) 
-      : null;
+    mentions.push({ tag: authorName, id: authorID });
+
+    const memberMediaLink = "https://i.imgur.com/3mykZ61.gif"; // Imgur লিংক বসানো হলো
 
     return api.sendMessage(
-      randomFile ? { body: msg, attachment: randomFile, mentions } : { body: msg, mentions },
+      { body: msg, attachment: memberMediaLink, mentions },
       threadID
     );
   } catch (e) {
