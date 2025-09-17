@@ -115,7 +115,7 @@ ${botPrefix}Admin
 
     mentions.push({ tag: authorName, id: authorID });
 
-    const memberMediaLink = "https://i.imgur.com/3mykZ61.gif"; // Imgur লিংক বসানো হলো
+    const memberMediaLink = "https://i.imgur.com/t239z0g.gif"; // Imgur লিংক বসানো হলো
 
     return api.sendMessage(
       { body: msg, attachment: memberMediaLink, mentions },
