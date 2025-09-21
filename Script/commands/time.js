@@ -43,6 +43,12 @@ module.exports.run = async function({ api, event }) {
 
 📆 𝗖𝘂𝗿𝗿𝗲𝗻𝘁 𝗧𝗶𝗺𝗲: ${currentTime}
 
+𝐃𝐚𝐭𝐞 : ${dateStr}
+
+𝐇𝐢𝐣𝐫𝐢 𝐃𝐚𝐭𝐞 : ${hijriDate}
+
+𝐁𝐚𝐧𝐠𝐥𝐚 𝐃𝐚𝐭𝐞 : ${banglaDate}
+
 ⏱️ 𝗕𝗼𝘁 𝗨𝗽𝘁𝗶𝗺𝗲: ${hours} hour(s), ${minutes} minute(s), ${seconds} second(s)
 
 💠𝗕𝗢𝗧 𝗔𝗗𝗠𝗜𝗡 𝐒𝐚𝐢𝐟𝐮𝐥 𝐈𝐬𝐥𝐚𝐦💠
