@@ -158,17 +158,17 @@ module.exports.run = async ({ event, api, args }) => {
   if (args.length === 0) {
     const helpMessage = `✨ 𝐀𝐯𝐚𝐢𝐥𝐚𝐛𝐥𝐞 𝐅𝐨𝐧𝐭𝐬 𝐒𝐭𝐚𝐲𝐥𝐞 ✨
 ✇━━━━━━━━━━━━━━━✇
-𝟏 - 𝓢𝓐𝓗𝓤 /𝓼𝓪𝓱𝓾
-𝟐 - 𝕊𝔸ℍ𝕌 𝕤𝕒𝕙𝕦
-𝟑 - 𝗦𝗔𝗛𝗨 | 𝗦𝗮𝗵𝘂
-𝟒 - 𝑺𝑨𝑯𝑼 | 𝒔𝒂𝒉𝒖
-𝟓 - 𝔖𝔄ℌ𝔘 | 𝔰𝔞𝔥𝔲
-𝟔 - SAHU | sᴀʜᴜ
-𝟕 - 🆂🅰🅷🆄 
-𝟖 - 🅂🄰🄷🅄
-𝟗 - 𝐒𝐀𝐇𝐔 | 𝐬𝐚𝐡𝐮
-𝟏𝟎 - 𝚂𝙰𝙷𝚄 | 𝚜𝚊𝚑𝚞
-Ex: font 1 SAHU/sahu`;
+𝟏 - 𝓢𝓐𝓘𝓕𝓤𝓛 / 𝓼𝓪𝓲𝓯𝓾𝓵
+𝟐 - 𝕊𝔸𝕀𝔽𝕌𝕃  𝕤𝕒𝕚𝕗𝕦𝕝
+𝟑 - 𝗦𝗔𝗜𝗙𝗨𝗟 | 𝗦𝗮𝗶𝗳𝘂𝗹
+𝟒 - 𝑺𝑨𝑰𝑭𝑼𝑳 | 𝒔𝒂𝒊𝒇𝒖𝒍
+𝟓 - 𝔖𝔄ℑ𝔽𝔘𝔏 | 𝔰𝔞𝔦𝔣𝔲𝔩
+𝟔 - SAIFUL | sᴀɪғᴜʟ
+𝟕 - 🆂🅰🅸🅵🆄🅻
+𝟖 - 🅂🄰🄸🄵🅄🄻
+𝟗 - 𝐒𝐀𝐈𝐅𝐔𝐋 | 𝐬𝐚𝐢𝐟𝐮𝐥
+𝟏𝟎 - 𝚂𝙰𝙸𝙵𝚄𝙻 | 𝚜𝚊𝚒𝚏𝚞𝚕
+Ex: font 1 SAIFUL/saiful`;
     return api.sendMessage(helpMessage, event.threadID, event.messageID);
   }
 
