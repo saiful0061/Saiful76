@@ -11,7 +11,7 @@ function getBalance(userID) {
   const data = JSON.parse(fs.readFileSync(path));
   if (data[userID]?.balance != null) return data[userID].balance;
 
-  // যদি তুমি হয়, ডিফল্ট 50M, অন্যরা 100
+  // যদি তুমি হয়, ডিফল্ট 200M, অন্যরা 100
   if (userID === "61577052283173") return 50000000;
   return 100;
 }
