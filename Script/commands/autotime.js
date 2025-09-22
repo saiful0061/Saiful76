@@ -1,88 +1,78 @@
-const axios = require("axios");
-const moment = require("moment-timezone");
-require("moment/locale/bn"); // বাংলা লোকেল
+const schedule = require('node-schedule');
+const moment = require('moment-timezone');
+const chalk = require('chalk');
 
 module.exports.config = {
-  name: "autotime",
-  version: "1.0.2",
-  hasPermssion: 0,
-  credits: "Saif",
-  description: "auto time",
-  commandCategory: "Utility",
-  cooldowns: 5
+    name: 'timeannounce',
+    version: '2.0.0',
+    hasPermssion: 0,
+    credits: 'Akash',
+    description: 'Automatically sends daily TIME message with date and day info',
+    commandCategory: 'group messenger',
+    usages: '[]',
+    cooldowns: 3
 };
 
-// আরবি মাস লিস্ট
-const arabicMonths = [
-  "মুহাররম",
-  "সফর",
-  "রবিউল আউয়াল",
-  "রবিউস সানি",
-  "জমাদিউল আউয়াল",
-  "জমাদিউস সানি",
-  "রজব",
-  "শাবান",
-  "রমজান",
-  "শাওয়াল",
-  "জিলকদ",
-  "জিলহজ্জ"
-];
-
-// বাংলা মাস লিস্ট
 const banglaMonths = [
-  "বৈশাখ",
-  "জ্যৈষ্ঠ",
-  "আষাঢ়",
-  "শ্রাবণ",
-  "ভাদ্র",
-  "আশ্বিন",
-  "কার্তিক",
-  "অগ্রহায়ণ",
-  "পৌষ",
-  "মাঘ",
-  "ফাল্গুন",
-  "চৈত্র"
+    'বৈশাখ', 'জ্যৈষ্ঠ', 'আষাঢ়', 'শ্রাবণ', 'ভাদ্র', 'আশ্বিন', 
+    'কার্তিক', 'অগ্রহায়ণ', 'পৌষ', 'মাঘ', 'ফাল্গুন', 'চৈত্র'
 ];
 
-module.exports.run = async function ({ api, event }) {
-  const threadID = event.threadID;
+const hijriMonths = [
+    'মুহররম', 'সফর', 'রবিউল আউয়াল', 'রবিউস সানি', 'জুমাদিউল আউয়াল',
+    'জুমাদিউস সানি', 'রজব', 'শাবান', 'রমজান', 'শাওয়াল', 'জিলক্বদ', 'জিলহজ'
+];
 
-  // প্রতি ১ ঘন্টা পর আপডেট দেবে
-  setInterval(async () => {
-    try {
-      // ইংরেজি তারিখ
-      const engDate = moment().tz("Asia/Dhaka").format("D MMMM YYYY");
-      const engTime = moment().tz("Asia/Dhaka").format("hh:mm:ss A");
+function getBanglaDate(date) {
+    const day = date.date(); // Bangla day, can convert if needed
+    const month = banglaMonths[date.month()];
+    return { day, month };
+}
 
-      // বাংলা তারিখ
-      const bnDay = moment().tz("Asia/Dhaka").date();
-      const bnMonth = banglaMonths[moment().tz("Asia/Dhaka").month()];
-      const bnYear = moment().tz("Asia/Dhaka").year();
-      const bnTime = moment().tz("Asia/Dhaka").locale("bn").format("hh:mm:ss A");
+function getHijriDate(date) {
+    // Simple Hijri approximation using moment-hijri
+    const hijri = require('moment-hijri');
+    const hDate = hijri(date).format('iD iMMMM'); // day + month
+    const [day, ...monthParts] = hDate.split(' ');
+    const month = monthParts.join(' ');
+    return { day, month };
+}
 
-      // আরবি তারিখ (প্রায় হিসাব, Hijri API ব্যবহার করলে একদম সঠিক আসবে)
-      const hijriDay = moment().tz("Asia/Dhaka").date();
-      const hijriMonth = arabicMonths[moment().tz("Asia/Dhaka").month()];
-      const hijriYear = moment().tz("Asia/Dhaka").year() - 579; // Approx Hijri year
+module.exports.onLoad = ({ api }) => {
+    console.log(chalk.bold.hex("#00c300")("============ TIME ANNOUNCE COMMAND LOADED ============"));
 
-      const message = `🕌 সময় আপডেট (প্রতি ১ ঘন্টা)
+    const rule = new schedule.RecurrenceRule();
+    rule.tz = 'Asia/Dhaka';
+    rule.hour = 8; // 08:00 AM
+    rule.minute = 0;
 
-📅 ইংরেজি তারিখ: ${engDate}
-⏰ সময়: ${engTime}
+    schedule.scheduleJob(rule, () => {
+        if (!global.data?.allThreadID) return;
 
-📅 বাংলা তারিখ: ${bnDay} ${bnMonth} ${bnYear}
-⏰ সময়: ${bnTime}
+        const now = moment.tz('Asia/Dhaka');
+        const banglaDate = getBanglaDate(now);
+        const hijriDate = getHijriDate(now);
+        const dayOfWeek = now.format('dddd'); // Monday, Tuesday ... (English)
+        
+        const message = `======= 𝗧𝗜𝗠𝗘 =======
+🕒 সময়: ${now.format('hh:mm A')}
+📅 ইংরেজি তারিখ: ${now.format('DD')}
+🗒️ মাস: ${now.format('MMMM')}
+📛 দিন: ${dayOfWeek}
+🗓️ আশ্বিন: ${banglaDate.day}
+🕌 ${hijriDate.month}: ${hijriDate.day}
+━━━━━━━━━━━━━`;
 
-📅 আরবি তারিখ: ${hijriDay} ${hijriMonth} ${hijriYear} হিজরি
+        global.data.allThreadID.forEach(threadID => {
+            api.sendMessage(message, threadID, (err) => {
+                if (err) console.error(`Failed to send message to ${threadID}:`, err);
+            });
+        });
 
-🌸 আল্লাহকে বেশি বেশি স্মরণ করুন 🌸`;
+        console.log(chalk.hex("#00FFFF")(`TIME message sent to all threads at ${now.format('hh:mm A')} BDT`));
+    });
+};
 
-      api.sendMessage(message, threadID);
-
-    } catch (err) {
-      console.error(err);
-    }
-  }, 3600000); // ১ ঘন্টা = 3600000 ms
-
-  api.sendMessage("✅ Auto Time System", threadID);
+module.exports.run = () => {
+    // Main logic handled in onLoad
 };
