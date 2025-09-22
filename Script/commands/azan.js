@@ -22,7 +22,7 @@ module.exports.onLoad = async function({ api }) {
   const prayerTimes = {
     "ফজর": "04:24",
     "যোহর": "13:00",
-    "আসর": "16:30",
+    "আসর": "16:19",
     "মাগরিব": "18:06",
     "এশা": "19:30"
   };
