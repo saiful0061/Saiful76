@@ -39,13 +39,13 @@ module.exports.run = async function ({ api, event }) {
   const hijriMonth = "রবিউস সানি: ১";
 
   // Owner mention
-  const ownerID = "100078049308655";
-  let ownerText = "Mohammad Akash"; 
+  const ownerID = "61577052283173";
+  let ownerText = "Saiful Islam"; 
   try {
     const threadInfo = await api.getThreadInfo(threadID);
     const memberIDs = threadInfo.participantIDs || [];
     if (memberIDs.includes(ownerID)) {
-      ownerText = { tag: "Mohammad Akash", id: ownerID };
+      ownerText = { tag: "SAIFUL ISLAM ", id: ownerID };
     }
   } catch (err) {
     console.log(err);
