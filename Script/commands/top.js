@@ -103,4 +103,4 @@ module.exports.run = async ({ event, api, args, Currencies, Users }) => {
                     api.sendMessage(msg, event.threadID, event.messageID)
     }
 
-                               }
+}
