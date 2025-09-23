@@ -4,10 +4,10 @@ const moment = require("moment-timezone");
 
 module.exports.config = {
   name: "time",
-  version: "1.0.5",
+  version: "2.0.0",
   hasPermssion: 0,
   credits: "Mohammad Akash",
-  description: "Displays current time and bot runtime with owner mention.",
+  description: "Displays current time and calendar in Bengali format.",
   commandCategory: "Info",
   cooldowns: 1,
   dependencies: {
@@ -17,7 +17,7 @@ module.exports.config = {
   }
 };
 
-module.exports.run = async function({ api, event }) {
+module.exports.run = async function ({ api, event }) {
   const { threadID } = event;
 
   // বটের আপটাইম
@@ -28,37 +28,41 @@ module.exports.run = async function({ api, event }) {
 
   // ঢাকার সময়
   const now = moment.tz("Asia/Dhaka");
-  const timeStr = now.format("hh:mm A");
-  const dateStr = now.format("DD-MM-YYYY");
 
-  // হিজরী ডেট (উদাহরণ হিসাবে)
-  const hijriDate = "[Sunday 6th Ashwin 1432]";
+  const timeStr = now.format("hh:mm A"); // সময়
+  const dateStr = now.format("DD"); // ইংরেজি তারিখ (দিন)
+  const monthStr = now.format("MMMM"); // মাস
+  const dayStr = now.format("dddd"); // সপ্তাহের দিন
 
-  // Bot Owner ID
-  const ownerID = "61577052283173";
+  // হিজরি / বাংলা ডেট (ডেমো হিসেবে)
+  const banglaMonth = "আশ্বিন: ৭";
+  const hijriMonth = "রবিউস সানি: ১";
 
-  // মেসেজ পাঠানোর আগে গ্রুপ মেম্বার চেক করা
-  let ownerText = "SAIFUL ISLAM "; // ডিফল্ট
+  // Owner mention
+  const ownerID = "100078049308655";
+  let ownerText = "Mohammad Akash"; 
   try {
     const threadInfo = await api.getThreadInfo(threadID);
     const memberIDs = threadInfo.participantIDs || [];
     if (memberIDs.includes(ownerID)) {
-      ownerText = { tag: "Saiful Islam", id: ownerID }; // মেনশন
+      ownerText = { tag: "Mohammad Akash", id: ownerID };
     }
   } catch (err) {
     console.log(err);
   }
 
   // মেসেজ ফরম্যাট
-  const message = `
-____❮ 𝙲𝚊𝚕𝚎𝚗𝚍𝚎𝚛 ❯____
-• 𝐓𝐢𝐦𝐞 : ${timeStr} ⏰
-• 𝐃𝐚𝐭𝐞 : ${dateStr}
-• 𝐇𝐢𝐣𝐫𝐢 𝐃𝐚𝐭𝐞 : ${hijriDate}
-• 𝐁𝐨𝐭 𝐔𝐩𝐭𝐢𝐦𝐞 : ${hours} hour(s), ${minutes} minute(s), ${seconds} second(s)
-
-• 𝙱𝚘𝚝 𝙾𝚠𝚗𝚎𝚛 - ${"𝙎𝘼𝙄𝙁𝙐𝙇 𝙄𝙎𝙇𝘼𝙈"}
-`;
+  const message =
+`======= 𝗧𝗜𝗠𝗘 =======
+🕒 সময়: ${timeStr}
+📅 ইংরেজি তারিখ: ${dateStr} 
+🗒️ মাস : ${monthStr}
+📛 দিন: ${dayStr}
+🗓️ ${banglaMonth}
+🕌 ${hijriMonth}
+━━━━━━━━━━━━━
+⏳ আপটাইম: ${hours}h ${minutes}m ${seconds}s
+👑 বট ওনার: ${typeof ownerText === "string" ? ownerText : ownerText.tag}`;
 
   api.sendMessage(message, threadID);
 };
