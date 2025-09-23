@@ -4,7 +4,7 @@ require("moment/locale/bn"); // বাংলা লোকেল
 
 module.exports.config = {
   name: "autotime",
-  version: "2.1.0",
+  version: "2.1.1",
   hasPermssion: 0,
   credits: "Saiful Islam × ChatGPT",
   description: "Auto Stylish Time (Bangla Hijri + 12H, Safe)",
@@ -58,7 +58,6 @@ async function getTimeMessage() {
       hijriMonthBn = hijriMonthsBn[parseInt(hijriData.month.number) - 1];
     }
   } catch (err) {
-    // Error হলে শুধু সুন্দর fallback টেক্সট দেখাবে
     hijriDay = "ডেটা পাওয়া যায়নি";
     hijriMonthBn = "";
   }
@@ -94,6 +93,4 @@ module.exports.run = async function ({ api, event }) {
       console.error(err);
     }
   }, 3600000); // ১ ঘন্টা
-
-  api.sendMessage("✅ Stylish Auto Time System Started!", threadID);
 };
