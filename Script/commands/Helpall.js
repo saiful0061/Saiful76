@@ -36,7 +36,10 @@ ${allCommands.map(cmd => `║ ➔ ${cmd}`).join("\n")}
 
  
  const backgrounds = [
-" https://i.imgur.com/sPl3Vro.png"
+ "https://i.imgur.com/WFHtK3d.png",
+ "https://i.imgur.com/luzSTS3.png",
+ "https://i.imgur.com/JKWVvKL.png",
+ "https://i.imgur.com/5P9Pckt.png"
  ];
  const selectedBg = backgrounds[Math.floor(Math.random() * backgrounds.length)];
  const imgPath = __dirname + "/cache/helpallbg.jpg";
