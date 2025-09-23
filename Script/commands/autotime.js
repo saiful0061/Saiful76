@@ -4,86 +4,96 @@ require("moment/locale/bn"); // বাংলা লোকেল
 
 module.exports.config = {
   name: "autotime",
-  version: "1.1.0",
+  version: "2.1.0",
   hasPermssion: 0,
-  credits: "Saif × ChatGPT",
-  description: "Auto Time with English, Bangla & Accurate Hijri",
+  credits: "Saiful Islam × ChatGPT",
+  description: "Auto Stylish Time (Bangla Hijri + 12H, Safe)",
   commandCategory: "Utility",
   cooldowns: 5
 };
 
 // বাংলা মাস লিস্ট
 const banglaMonths = [
-  "বৈশাখ",
-  "জ্যৈষ্ঠ",
-  "আষাঢ়",
-  "শ্রাবণ",
-  "ভাদ্র",
-  "আশ্বিন",
-  "কার্তিক",
-  "অগ্রহায়ণ",
-  "পৌষ",
-  "মাঘ",
-  "ফাল্গুন",
-  "চৈত্র"
+  "বৈশাখ","জ্যৈষ্ঠ","আষাঢ়","শ্রাবণ","ভাদ্র","আশ্বিন",
+  "কার্তিক","অগ্রহায়ণ","পৌষ","মাঘ","ফাল্গুন","চৈত্র"
 ];
+
+// বাংলা সপ্তাহের দিন
+const banglaDays = [
+  "রবিবার","সোমবার","মঙ্গলবার","বুধবার","বৃহস্পতিবার","শুক্রবার","শনিবার"
+];
+
+// হিজরি মাস (বাংলা নাম)
+const hijriMonthsBn = [
+  "মুহররম","সফর","রবিউল আউয়াল","রবিউস সানি",
+  "জমাদিউল আউয়াল","জমাদিউস সানি","রজব","শা'বান",
+  "রমজান","শাওয়াল","জ্বিলকদ","জ্বিলহজ্জ"
+];
+
+async function getTimeMessage() {
+  const dhakaTime = moment().tz("Asia/Dhaka");
+
+  // ইংরেজি তারিখ + মাস
+  const engDay = dhakaTime.format("DD");
+  const engMonth = dhakaTime.format("MMMM");
+
+  // বাংলা দিন/মাস
+  const bnDay = dhakaTime.date();
+  const bnMonth = banglaMonths[dhakaTime.month()];
+  const weekDayBn = banglaDays[dhakaTime.day()];
+
+  // সময় (12H AM/PM)
+  const timeNow = dhakaTime.format("hh:mm A");
+
+  // আজকের গ্রেগরিয়ান তারিখ
+  const today = dhakaTime.format("DD-MM-YYYY");
+  let hijriDay = "ডেটা পাওয়া যায়নি";
+  let hijriMonthBn = "";
+
+  try {
+    const hijriRes = await axios.get(`http://api.aladhan.com/v1/gToH?date=${today}`);
+    if (hijriRes.data?.data?.hijri) {
+      const hijriData = hijriRes.data.data.hijri;
+      hijriDay = hijriData.day;
+      hijriMonthBn = hijriMonthsBn[parseInt(hijriData.month.number) - 1];
+    }
+  } catch (err) {
+    // Error হলে শুধু সুন্দর fallback টেক্সট দেখাবে
+    hijriDay = "ডেটা পাওয়া যায়নি";
+    hijriMonthBn = "";
+  }
+
+  return `======= 𝗧𝗜𝗠𝗘 =======
+📅 ইংরেজি তারিখ: ${engDay} 
+🗒️ মাস : ${engMonth}
+📛 দিন: ${weekDayBn}
+🗓️ ${bnMonth}: ${bnDay} 
+🕌 ${hijriMonthBn ? hijriMonthBn : "হিজরি"}: ${hijriDay}
+🕒 সময়: ${timeNow}
+━━━━━━━━━━━━━━━
+আল্লাহ কে বেশি বেশি সরন করুন..! 
+৫ ওয়াক্ত নামাজ পরুন..!
+সবার সাথে ভালো বেবহার করুন..!
+⋆✦⋆⎯⎯⎯⎯⎯⎯⎯⎯⋆✦⋆
+𝐂𝐫𝐞𝐚𝐭𝐨𝐫 ━➢ 𝐒𝐚𝐢𝐟𝐮𝐥 𝐈𝐬𝐥𝐚𝐦`;
+}
 
 module.exports.run = async function ({ api, event }) {
   const threadID = event.threadID;
 
-  // প্রতি ১ ঘন্টা পর আপডেট দেবে
+  // প্রথমবার কল
+  const firstMessage = await getTimeMessage();
+  api.sendMessage(firstMessage, threadID);
+
+  // প্রতি ১ ঘন্টা পর
   setInterval(async () => {
     try {
-      // ইংরেজি তারিখ
-      const engDate = moment().tz("Asia/Dhaka").format("D MMMM YYYY");
-      const engTime = moment().tz("Asia/Dhaka").format("hh:mm:ss A");
-
-      // বাংলা তারিখ
-      const bnDay = moment().tz("Asia/Dhaka").date();
-      const bnMonth = banglaMonths[moment().tz("Asia/Dhaka").month()];
-      const bnYear = moment().tz("Asia/Dhaka").year();
-      const bnTime = moment().tz("Asia/Dhaka").locale("bn").format("hh:mm:ss A");
-
-      const today = moment().tz("Asia/Dhaka").format("DD-MM-YYYY");
-      let hijriDay, hijriMonth, hijriYear;
-
-      try {
-        const hijriRes = await axios.get(`http://api.aladhan.com/v1/gToH?date=${today}`);
-        if (hijriRes.data && hijriRes.data.data && hijriRes.data.data.hijri) {
-          const hijriData = hijriRes.data.data.hijri;
-          hijriDay = hijriData.day;
-          hijriMonth = hijriData.month.ar; // আরবি নাম
-          hijriYear = hijriData.year;
-        } else {
-          hijriDay = "N/A";
-          hijriMonth = "N/A";
-          hijriYear = "N/A";
-        }
-      } catch (err) {
-        console.error("Hijri API Error:", err.message);
-        hijriDay = "Error";
-        hijriMonth = "Error";
-        hijriYear = "Error";
-      }
-
-      const message = `🕌 সময় আপডেট (প্রতি ১ ঘন্টা)
-
-📅 ইংরেজি তারিখ: ${engDate}
-⏰ সময়: ${engTime}
-
-📅 বাংলা তারিখ: ${bnDay} ${bnMonth} ${bnYear}
-⏰ সময়: ${bnTime}
-
-📅 আরবি তারিখ: ${hijriDay} ${hijriMonth} ${hijriYear} হিজরি
-
-🌸 আল্লাহকে বেশি বেশি স্মরণ করুন 🌸`;
-
+      const message = await getTimeMessage();
       api.sendMessage(message, threadID);
-
     } catch (err) {
       console.error(err);
     }
-  }, 3600000); // ১ ঘন্টা = 3600000 ms
+  }, 3600000); // ১ ঘন্টা
 
-  api.sendMessage("✅ Auto Time System Started!", threadID);
+  api.sendMessage("✅ Stylish Auto Time System Started!", threadID);
 };
