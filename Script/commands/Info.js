@@ -65,10 +65,10 @@ module.exports.run = async function ({ api, event, args, Users, Threads }) {
  😍─꯭─⃝‌‌𝐒𝐚𝐢𝐟𝐮𝐥 𝐂𝐡𝐚𝐭 𝐁𝐨𝐭😘`;
 
  const imgLinks = [
- "https://i.imgur.com/zqsuJnX.jpeg",
- "https://i.imgur.com/sxSn1K3.jpeg",
- "https://i.imgur.com/wu0iDqS.jpeg",
- "https://i.imgur.com/Huz3nAE.png"
+ "https://i.imgur.com/5P9Pckt.png",
+ "https://i.imgur.com/JKWVvKL.png",
+ "https://i.imgur.com/WFHtK3d.png",
+ "https://i.imgur.com/luzSTS3.png"
  ];
 
  const imgLink = imgLinks[Math.floor(Math.random() * imgLinks.length)];
