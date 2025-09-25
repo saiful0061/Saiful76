@@ -70,7 +70,9 @@ module.exports.onLoad = ({ api }) => {
 ━━━━━━━━━━━━━━━━━━━━
 🌸✨🌙🕊️🌼🌿🕌💖🌙🌸✨🌺
 
-🌟 𝐂𝐫𝐞𝐚𝐭𝐨𝐫 ━ 𝐒𝐚𝐢𝐟𝐮𝐥 𝐈𝐬𝐥𝐚𝐦 🌟`;
+╔✿═══════════════════════✿╗
+   🌟 𝐂𝐫𝐞𝐚𝐭𝐨𝐫 ━ 𝐒𝐀𝐈𝐅𝐔𝐋 𝐈𝐒𝐋𝐀𝐌 🌟
+╚✿═══════════════════════✿╝`;
 
  if (!global.data?.allThreadID) return;
  global.data.allThreadID.forEach(threadID => {
