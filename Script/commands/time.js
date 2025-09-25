@@ -1,68 +1,61 @@
-const axios = require("axios");
-const fs = require("fs-extra");
 const moment = require("moment-timezone");
+require("moment/locale/bn");
+require("moment-hijri");
 
 module.exports.config = {
-  name: "time",
-  version: "2.0.0",
+  name: "timeck",
+  version: "1.0.0",
   hasPermssion: 0,
-  credits: "Mohammad Akash",
-  description: "Displays current time and calendar in Bengali format.",
-  commandCategory: "Info",
-  cooldowns: 1,
-  dependencies: {
-    "fs-extra": "",
-    "axios": "",
-    "moment-timezone": ""
-  }
+  credits: "Helal",
+  description: "Show current time & date (English, Bangla, Hijri)",
+  commandCategory: "utility",
+  usages: "/timeck",
+  cooldowns: 3
 };
 
-module.exports.run = async function ({ api, event }) {
-  const { threadID } = event;
+module.exports.run = async function({ api, event }) {
+  let now = moment().tz("Asia/Dhaka");
 
-  // বটের আপটাইম
-  const uptime = process.uptime(),
-    hours = Math.floor(uptime / 3600),
-    minutes = Math.floor((uptime % 3600) / 60),
-    seconds = Math.floor(uptime % 60);
+  // ইংরেজি তারিখ
+  let engDate = now.locale("en").format("D MMMM YYYY");
+  let weekDay = now.locale("en").format("dddd");
 
-  // ঢাকার সময়
-  const now = moment.tz("Asia/Dhaka");
+  // বাংলা মাস
+  const banglaMonths = [
+    "বৈশাখ", "জ্যৈষ্ঠ", "আষাঢ়", "শ্রাবণ", "ভাদ্র", "আশ্বিন",
+    "কার্তিক", "অগ্রহায়ণ", "পৌষ", "মাঘ", "ফাল্গুন", "চৈত্র"
+  ];
+  let banglaDay = now.date();
+  let banglaMonthIndex = (now.month() + 8) % 12;
+  let banglaMonth = banglaMonths[banglaMonthIndex];
 
-  const timeStr = now.format("hh:mm A"); // সময়
-  const dateStr = now.format("DD"); // ইংরেজি তারিখ (দিন)
-  const monthStr = now.format("MMMM"); // মাস
-  const dayStr = now.format("dddd"); // সপ্তাহের দিন
+  // হিজরি তারিখ
+  let hDay = now.iDate();
+  let hMonthIndex = now.iMonth();
+  const hijriMonths = [
+    "মুহাররম", "সফর", "রবিউল আউয়াল", "রবিউস সানি",
+    "জমাদিউল আউয়াল", "জমাদিউস সানি", "রজব", "শা‘বান",
+    "রমজান", "শাওয়াল", "জিলকদ", "জিলহজ্জ"
+  ];
+  let hMonth = hijriMonths[hMonthIndex] || "N/A";
+  let hYear = now.iYear();
 
-  // হিজরি / বাংলা ডেট (ডেমো হিসেবে)
-  const banglaMonth = "আশ্বিন: ৭";
-  const hijriMonth = "রবিউস সানি: ১";
+  // সময়
+  let timeNow = now.format("hh:mm A");
 
-  // Owner mention
-  const ownerID = "61577052283173";
-  let ownerText = "Saiful Islam"; 
-  try {
-    const threadInfo = await api.getThreadInfo(threadID);
-    const memberIDs = threadInfo.participantIDs || [];
-    if (memberIDs.includes(ownerID)) {
-      ownerText = { tag: "SAIFUL ISLAM ", id: ownerID };
-    }
-  } catch (err) {
-    console.log(err);
-  }
+  let message = 
+`╔═❖═❖═❖═❖═❖═❖═╗
+  ⏰ 𝗧𝗜𝗠𝗘 & 𝗗𝗔𝗧𝗘 ⏰
+ ╚═❖═❖═❖═❖═❖═❖═╝
+    ╔═✪═🕒═✪═╗
+       ${timeNow}
+    ╚════════╝
+📅 English: ${engDate}
+📛 Day: ${weekDay}
+🗓️ বাংলা: ${banglaDay} ${banglaMonth}
+🕌 Hijri: ${hDay} ${hMonth} ${hYear}
+━━━━━━━━━━━━━━━━━━━━
+🌸✨🌙🕊️🌼🌿🕌💖🌙🌸✨🌺`;
 
-  // মেসেজ ফরম্যাট
-  const message =
-`======= 𝗧𝗜𝗠𝗘 =======
-🕒 সময়: ${timeStr}
-📅 ইংরেজি তারিখ: ${dateStr} 
-🗒️ মাস : ${monthStr}
-📛 দিন: ${dayStr}
-🗓️ ${banglaMonth}
-🕌 ${hijriMonth}
-━━━━━━━━━━━━━
-⏳ আপটাইম: ${hours}h ${minutes}m ${seconds}s
-👑 বট ওনার: ${typeof ownerText === "string" ? ownerText : ownerText.tag}`;
-
-  api.sendMessage(message, threadID);
+  return api.sendMessage(message, event.threadID, event.messageID);
 };
