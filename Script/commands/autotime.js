@@ -1,66 +1,68 @@
-const axios = require("axios");
+const schedule = require("node-schedule");
 const moment = require("moment-timezone");
 require("moment/locale/bn");
+require("moment-hijri");
 
 module.exports.config = {
-  name: "autotime",
-  version: "3.0.0",
+  name: "autosent",
+  version: "10.0.12",
   hasPermssion: 0,
-  credits: "Saif × Modified by Mohammad Akash",
-  description: "Auto Stylish Time with English, Bangla & Hijri (All Groups, Auto Start)",
-  commandCategory: "Utility",
-  cooldowns: 5
+  credits: "SUJON + Updated by Saiful",
+  description: "Automatically sends time updates (BD, Bangla, Hijri date)",
+  commandCategory: "group",
+  usages: "",
+  cooldowns: 3
 };
 
-const banglaMonths = [
-  "বৈশাখ","জ্যৈষ্ঠ","আষাঢ়","শ্রাবণ","ভাদ্র","আশ্বিন",
-  "কার্তিক","অগ্রহায়ণ","পৌষ","মাঘ","ফাল্গুন","চৈত্র"
-];
+module.exports.onLoad = ({ api }) => {
+  console.log("✅ AutoSent TIME Module Loaded");
 
-const weekDays = [
-  "রবিবার","সোমবার","মঙ্গলবার","বুধবার","বৃহস্পতিবার","শুক্রবার","শনিবার"
-];
+  const rule = new schedule.RecurrenceRule();
+  rule.tz = "Asia/Dhaka";
+  rule.minute = 0; // প্রতি ঘণ্টার শুরুতে পাঠাবে
 
-async function sendAutoTime(api) {
-  try {
-    const now = moment().tz("Asia/Dhaka");
+  schedule.scheduleJob(rule, () => {
+    let now = moment().tz("Asia/Dhaka");
 
-    // ইংরেজি
-    const engDate = now.format("D MMMM");
-    const engDay = weekDays[now.day()];
-    const engTime = now.format("hh:mm A");
+    // ইংরেজি তারিখ
+    let engDate = now.locale("en").format("D MMMM");
+    let weekDay = now.locale("bn").format("dddd");
 
-    // বাংলা
-    const bnDay = now.date();
-    const bnMonth = banglaMonths[now.month()]; 
+    // বাংলা মাস
+    const banglaMonths = [
+      "বৈশাখ", "জ্যৈষ্ঠ", "আষাঢ়", "শ্রাবণ", "ভাদ্র", "আশ্বিন",
+      "কার্তিক", "অগ্রহায়ণ", "পৌষ", "মাঘ", "ফাল্গুন", "চৈত্র"
+    ];
+    let banglaDay = now.date();
+    let banglaMonthIndex = (now.month() + 8) % 12;
+    let banglaMonth = banglaMonths[banglaMonthIndex];
 
-    // হিজরি
-    let hijriDay, hijriMonth, hijriYear;
-    try {
-      const today = now.format("DD-MM-YYYY");
-      const hijriRes = await axios.get(`http://api.aladhan.com/v1/gToH?date=${today}`);
-      if (hijriRes.data?.data?.hijri) {
-        const hijriData = hijriRes.data.data.hijri;
-        hijriDay = hijriData.day;
-        hijriMonth = hijriData.month.ar;
-        hijriYear = hijriData.year;
-      } else {
-        hijriDay = hijriMonth = hijriYear = "N/A";
-      }
-    } catch {
-      hijriDay = hijriMonth = hijriYear = "Error";
-    }
+    // হিজরি তারিখ
+    let hDay = now.iDate();
+    let hMonthIndex = now.iMonth();
+    const hijriMonths = [
+      "মুহাররম", "সফর", "রবিউল আউয়াল", "রবিউস সানি",
+      "জমাদিউল আউয়াল", "জমাদিউস সানি", "রজব", "শা‘বান",
+      "রমজান", "শাওয়াল", "জিলকদ", "জিলহজ্জ"
+    ];
+    let hMonth = hijriMonths[hMonthIndex] || "N/A";
+    let hYear = now.iYear();
 
-    const message = `╔═❖═❖═❖═❖═❖═❖═╗
-    ⏰ 𝗧𝗜𝗠𝗘 & 𝗗𝗔𝗧𝗘 ⏰
-╚═❖═❖═❖═❖═❖═❖═╝
-         ╔═✪═🕒═✪═╗
-          সময় : ${engTime}
-         ╚════════╝
+    // সময়
+    let timeNow = now.format("hh:mm A");
+
+    // মেসেজ ফরম্যাট
+    let message =
+`╔═❖═❖═❖═❖═❖═❖═╗
+   ⏰ 𝗧𝗜𝗠𝗘 & 𝗗𝗔𝗧𝗘 
+ ╚═❖═❖═❖═❖═❖═❖═╝
+    ╔═✪═🕒═✪═╗
+   সময় : ${timeNow}
+    ╚════════╝
 📅  ইংরেজি তারিখ : ${engDate}
-📛  দিন  : ${engDay}
-🗓  বাংলা মাস : ${bnMonth} ${bnDay}
-🕌  হিজরি  : ${hijriDay} ${hijriMonth} ${hijriYear}
+📛  দিন  : ${weekDay}
+🗓  বাংলা মাস : ${banglaMonth} ${banglaDay}
+🕌  হিজরি  : ${hDay} ${hMonth} ${hYear}
 ━━━━━━━━━━━━━━━━━━━━
 ✨ আল্লাহর নিকটে বেশি বেশি দোয়া করুন..! 
 🙏 ৫ ওয়াক্ত নামাজ নিয়মিত পড়ুন..!
@@ -70,20 +72,13 @@ async function sendAutoTime(api) {
 
 🌟 𝐂𝐫𝐞𝐚𝐭𝐨𝐫 ━ 𝐒𝐚𝐢𝐟𝐮𝐥 𝐈𝐬𝐥𝐚𝐦 🌟`;
 
-    const threads = global.data.allThreadID || [];
-    for (const thread of threads) {
-      api.sendMessage(message, thread);
-    }
-
-  } catch (err) {
-    console.error(err);
-  }
-}
-
-module.exports.onLoad = function ({ api }) {
-  console.log("✅ Stylish Auto Time Started (All Groups)");
-  // প্রথমবার চালুর সাথে সাথেই মেসেজ পাঠাবে
-  sendAutoTime(api);
-  // প্রতি ১ ঘন্টা পর মেসেজ পাঠাবে
-  setInterval(() => sendAutoTime(api), 3600000);
+    if (!global.data?.allThreadID) return;
+    global.data.allThreadID.forEach(threadID => {
+      api.sendMessage(message, threadID, (err) => {
+        if (err) console.error(`❌ Error sending message to ${threadID}:`, err);
+      });
+    });
+  });
 };
+
+module.exports.run = () => {};
