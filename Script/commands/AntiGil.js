@@ -16,7 +16,7 @@ module.exports.config = {
   name: "antigali",
   version: "3.3.0",
   hasPermssion: 0,
-  credits: "Rx Abdullah", // always locked
+  credits: "Jihad", // always locked
   description: "Per-user anti-gali with UID match for kick + admin checks (default ON)",
   commandCategory: "moderation",
   usages: "!antigali on / !antigali off",
