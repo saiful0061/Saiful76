@@ -1,4 +1,4 @@
-let antiGaliStatus = true; // Default Off now
+let antiGaliStatus = false; // Default Off now
 let offenseTracker = {}; // threadID -> userID -> { count, uidSaved }
 
 const badWords = [
@@ -16,7 +16,7 @@ module.exports.config = {
   name: "antigali",
   version: "3.3.0",
   hasPermssion: 0,
-  credits: "Jihad", // always locked
+  credits: "Rx Abdullah", // always locked
   description: "Per-user anti-gali with UID match for kick + admin checks (default ON)",
   commandCategory: "moderation",
   usages: "!antigali on / !antigali off",
