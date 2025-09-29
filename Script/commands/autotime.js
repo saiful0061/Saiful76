@@ -1,111 +1,195 @@
-const schedule = require('node-schedule');
-const chalk = require('chalk');
-const moment = require('moment-timezone');
+const nazrul = [
+  {
+    timer: '12:00:00 AM',
+message: ['💞 বন্ধু ও পরিবারকে ভালোবাসুন..!
+🫂 মানুষের সাহায্যে এগিয়ে আসুন..!
+🌈 সব কাজে নিয়ত শুদ্ধ রাখুন..!'], 
+},
+{
+timer: '1:00:00 AM',
+message: ['🌟 প্রতিদিন নতুন কিছু ভালো করুন..!
+🕯️ রাতের তাহাজ্জুদ আল্লাহর কাছে প্রিয়..!
+☪️ রমজানের রোজা আপনার আত্মাকে শক্ত করবে..!']
+},
+{
+timer: '2:00:00 AM',
+message: ['🪷 নিজের চরিত্র সুন্দর করুন, আল্লাহ খুশি হবেন..!
+💎 হারাম থেকে দূরে থাকুন, শান্তি পাবেন..!
+🛡️ ঈমান হলো জীবনের সবচেয়ে বড় সম্পদ..!']
+},
+{
+timer: '3:00:00 AM',
+message: ['🕋 প্রতিটি কাজ আল্লাহর জন্য করুন..!
+✨ হাসুন, ভালো উদ্দীপনা ছড়িয়ে দিন..!
+📿 নামাজ, দোয়া ও ভালো কাজ—এগুলোই জীবনের শক্তি..!']
+},
+{
+timer: '4:00:00 AM',
+message: ['🔑 তাওবা করুন, গুনাহ থেকে মুক্তি পাবেন..!
+🍃 ধৈর্য ধরুন, আল্লাহ কঠিন সময় সহজ করবেন..!
+🌈 দয়া ও সহমর্মিতা প্রদর্শন করুন, আল্লাহ আপনাকে সাহায্য করবেন..!']
+},
+{
+timer: '5:00:00 AM',
+message: ['🕌 জামাতে নামাজ—ঈমানের দৃঢ় ভিত্তি..!
+🌸 বাবা-মায়ের দোয়া নিন, জীবন হবে বরকতপূর্ণ..!
+💡 নেক কাজ করুন, আল্লাহর দৃষ্টি আপনার উপর থাকবে..!']
+},
+{
+timer: '6:00:00 AM',
+message: ['🕊️ ক্ষমাশীল হোন, মনের শান্তি পাবেন..!
+💞 সদাচরণ করুন, মানুষ আপনার প্রতি আকৃষ্ট হবে..!']
+},
+{
+timer: '7:00:00 AM',
+message: ['✨ আল্লাহর নাম স্মরণে হৃদয় শান্ত হয়..!
+🙏 নিয়মিত নামাজ—সফল জীবনের চাবিকাঠি..!
+🤲 বেশি বেশি দোয়া করুন, আল্লাহ নিকট শুনুন..!']
+},
+{
+timer: '8:00:00 AM',
+message: ['🪷 চরিত্রকে সুন্দর করুন, আল্লাহ খুশি হবেন..!
+💎 হারাম থেকে দূরে থাকুন, শান্তি পাবেন..!
+🛡️ ঈমান হলো জীবনের সবচেয়ে বড় সম্পদ..!']
+},
+{
+timer: '9:00:00 AM',
+message: ['📖 কুরআনের শিক্ষায় জীবন সাজান..!
+🫶 মানুষকে ভালোবাসুন, আল্লাহ খুশি হবেন..!
+🙏 দোয়া কখনো বাদ দেবেন না..!']
+},
+{
+timer: '10:00:00 AM',
+message: ['✨ আল্লাহর নিকটে বেশি বেশি দোয়া করুন..!
+🙏 ৫ ওয়াক্ত নামাজ নিয়মিত পড়ুন..!
+🤝 সকলের সাথে সদ্ভাব বজায় রাখুন..!']
+},
+{
+timer: '11:00:00 AM',
+message: ['🌙 কুরআন পড়ুন, আলোর পথে চলুন..!
+🕊️ ক্ষমাশীল হোন, হৃদয় শান্ত রাখুন..!
+💞 ভালো আচরণ ছড়িয়ে দিন, মানুষ আপনাকে মনে রাখবে..!']
+},
+{
+timer: '12:00:00 PM',
+message: ['🪷 চরিত্রকে সুন্দর করুন, আল্লাহ খুশি হবেন..!
+💎 হারাম থেকে দূরে থাকুন, শান্তি পাবেন..!
+🛡️ ঈমান হলো জীবনের সবচেয়ে বড় সম্পদ..!']
+},
+{
+timer: '1:00:00 PM',
+message: ['🌸 বাবা-মায়ের দোয়া নিন..!
+💎 হারাম থেকে নিজেকে বাঁচান..!
+🌈 ভালো কাজে একে অপরকে সাহায্য করুন..!']
+},
+{
+timer: '2:00:00 PM',
+message: ['🌟 মানুষের জন্য দয়া ও সহমর্মিতা প্রদর্শন করুন..!
+🤲 বেশি বেশি আল্লাহর কাছে দোয়া করুন..!
+💞 বন্ধুত্ব ও ভালবাসা হালাল পথে রক্ষা করুন..!']
+},
+{
+timer: '3:00:00 PM',
+message: ['🕊️ পাপ থেকে দূরে থাকুন..!
+🌙 আল্লাহর রহমতে প্রতিদিন নতুন শুরু করুন..!
+✨ প্রতিটি কাজের শুরুর আগে আল্লাহর নাম স্মরণ করুন..!']
+},
+{
+timer: '4:00:00 PM',
+message: ['💡 জ্ঞান অর্জন করুন, কারণ জ্ঞান আল্লাহর নিকট প্রিয়..!
+🌸 খারাপ অভ্যাস ত্যাগ করুন, ভালো অভ্যাস গড়ে তুলুন..!
+🕋 সদকার মাধ্যমে জীবনকে সুন্দর করুন..!']
+},
+{
+timer: '5:00:00 PM',
+message: ['✍️ ভালো কথা বলা ইবাদত..!
+🤝 ভ্রাতৃত্ব বজায় রাখুন..!
+🌟 প্রতিটি কাজে নিয়ত শুদ্ধ রাখুন..!']
+},
+{
+timer: '6:00:00 PM',
+message: ['🍃 সবর করা মুমিনের গুণ..!
+💧 অযু আপনাকে গুনাহ থেকে দূরে রাখে..!
+🪷 নামাজ মুমিনের মিরাজ..!']
+},
+{
+timer: '7:00:00 PM',
+message: ['🌺 সন্তুষ্টি হলো প্রকৃত সম্পদ..!
+🔑 তাওবা হলো জান্নাতের দরজার চাবি..!
+🪽 এতিমের মাথায় হাত বুলানো রহমত আনে..!']
+},
+{
+timer: '8:00:00 PM',
+message: ['🕯️ রাতের তাহাজ্জুদ আল্লাহর নিকটে প্রিয়..!
+☪️ রমজানের রোজা তাকওয়া আনে..!
+🛡️ ঈমান হলো সর্বশ্রেষ্ঠ সম্পদ..!']
+},
+{
+timer: '9:00:00 PM',
+message: ['🌟 রাতে উঠুন, আল্লাহর রহমত পান..!
+🛎️ গভীর রাতের সেকেন্ডে আল্লাহর স্মরণ করুন..!
+🌙 তাহাজ্জুদ হলো মুমিনের গর্ব..!"']
+},
+{
+timer: '10:00:00 PM',
+message: ['🕋 আল্লাহর পথে জীবনের প্রতিটি পদক্ষেপ রাখুন..!
+📿 সকাল-সন্ধ্যার দোয়া পড়ুন..!
+🌹 অন্যের প্রতি সদাচরণ করুন..!']
+},
+{
+timer: '11:00:00 PM',
+message: ['💞 রাতের ইবাদত মনের নৈঃশব্দ্য বাড়ায়..!
+🔑 গোপন দোয়া আল্লাহর কাছে প্রিয়..!
+🕊️ রাতের নামাজ পাপ মুছে দেয়..!']
+  }
+ 
+];
 
 module.exports.config = {
-    name: 'autosent',
-    version: '11.1.0',
-    hasPermssion: 0,
-    credits: 'Mohammad Akash',
-    description: 'Automatically sends fun & entertaining styled messages (BD Time)',
-    commandCategory: 'group messenger',
-    usages: '[]',
-    cooldowns: 3
+  name: "autotime",
+  version: "1.0.0",
+  permission: 0,
+  credits: "nazrul",
+  description: "প্রতি ঘন্টায় ইসলামিক বার্তা পাঠায় (বাংলা তারিখ সহ)",
+  prefix: true,
+  commandCategory: "user",
+  usages: "",
+  cooldowns: 5
 };
-
-// মেসেজ লিস্ট (ঘন্টা অনুযায়ী)
-const messages = [
-    '🌙 এত রাত কিসের জন্য জাগছিস? 😴✨',
-    '⏰ Mobile বন্ধ করে ঘুমো 😏🛌',
-    '😵‍💫 এত সাহস দেখানোর সময় নয়, বিশ্রাম নাও 😴',
-    '🛌 সবাই ঘুমাচ্ছে, আর তুই জাগছিস? 😼',
-    '🌅 উঠে fresh হও, কিছু light exercise করো 🌸💪',
-    '🕌 নামাজ বা একটু stretch করে নাও 🙏✨',
-    '☀️ Rise and shine! দিনটা সুন্দর শুরু কর 💪😎',
-    '🪥 দাঁত ব্রাশ করো আর breakfast খাও 🥞🍳',
-    '🍳 Mobile পরে রাখো আর energy নিয়ে দিন শুরু কর 📵',
-    '😎 ক্লাস বা কাজ শুরু করো, সময় নষ্ট করা বন্ধ কর 🕒',
-    '📚 একটু focus করার সময়, distractions এড়িয়ে যাও 😏',
-    '😇 Playtime শেষ, study mode on 🕹️📖',
-    '🌞 Good Afternoon! একটু fresh হও 🙌💖',
-    '🍛 Lunch খাও, energy refill কর 😋',
-    '😎 Chill time, mobile কম ব্যবহার কর 📵',
-    '😴 Nap নিতে পারো, refresh হও 😌',
-    '🥵 গরম পড়েছে, পানি খাও 💦',
-    '😅 একটু হাসি ছড়িয়ে দিন, mood fresh রাখো 😆',
-    '🌆 Hands washed? Relax এবং chill করো 👐💦',
-    '📚 পড়াশোনা চলছে তো? Concentrate করো 😏',
-    '🔥 মজা করো, তবে বেশি disturb কোরো না 😎',
-    '😘 Dinner খেয়েছো? খেয়ে নাও 🍽️❤️',
-    '😴 Mobile বন্ধ করে বিশ্রাম নাও 📵',
-    '🛌 Relax! আগামি দিনের জন্য energy জমাও 😌'
-];
-
-// extra motivational / fun lines
-const extraLines = [
-    "💡 মনে রেখো: ঘুম শরীর আর মনের জন্য ভীষণ জরুরি।",
-    "🔥 আজকের কাজ কালকে ফেলে রেখো না!",
-    "🌸 হাসি হলো শ্রেষ্ঠ ওষুধ। একটু হাসো তো! 😁",
-    "💪 ছোট ছোট কাজ মিলে বড় সাফল্য হয়।",
-    "📱 মোবাইল নয়, নিজের স্বপ্নে Focus করো।",
-    "🌎 পৃথিবীটা সুন্দর — একটু চোখ তুলে তাকাও!",
-    "✨ তোমার হাসি কারো পুরো দিনকে সুন্দর করতে পারে।",
-    "😎 কাজের মাঝে মজা খুঁজে নিতে শিখো।",
-    "💖 নিজের প্রতি Positive থাকো।",
-    "🎯 আজকের লক্ষ্য পূর্ণ করো, কালকে আবার নতুন শুরু।"
-];
-
-// Function to determine Bengali time period
-function getBengaliPeriod(hour) {
-    if (hour >= 4 && hour < 12) return 'সকাল';
-    if (hour >= 12 && hour < 15) return 'দুপুর';
-    if (hour >= 15 && hour < 18) return 'বিকেল';
-    return 'রাত';
-}
 
 module.exports.onLoad = ({ api }) => {
-    console.log(chalk.bold.hex("#00c300")("============ AUTOSENT COMMAND LOADED (BD TIME) ============"));
+  setInterval(() => {
+    const now = new Date(Date.now() + 6 * 60 * 60 * 1000); 
+    const fullTime = now.toLocaleTimeString('en-US', { hour12: true }); 
+    const matchTime = fullTime;
 
-    for (let h = 0; h < 24; h++) {
-        const rule = new schedule.RecurrenceRule();
-        rule.tz = 'Asia/Dhaka';
-        rule.hour = h;
-        rule.minute = 0;
+    const nazrula = now.getDate(); // 13
+    const nazrulh = now.toLocaleString('bn-BD', { month: 'long' }); 
+    const nazrulr = now.getFullYear(); 
+    const nazruly = now.toLocaleString('bn-BD', { weekday: 'long' }); 
+    const nazrulk = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }); 
 
-        schedule.scheduleJob(rule, () => {
-            if (!global.data?.allThreadID) return;
+    const islamickChat =
+`╔═❖═❖═❖═❖═❖═❖═╗
+    ⏰ 𝗧𝗜𝗠𝗘 & 𝗗𝗔𝗧𝗘 ⏰
+╚═❖═❖═❖═❖═❖═❖═╝
+         ╔═✪═🕒═✪═╗
+          𝐓𝐢𝐦𝐞: ${nazrulk}
+         ╚════════╝
+📅 𝐃𝐚𝐭𝐞: ${nazrula}
+📛 𝐃𝐚𝐲: ${nazruly}
+🗓️ 𝐌𝐨𝐧𝐭𝐡: ${nazrulh}
+📆 𝐘𝐞𝐚𝐫𝐬: ${nazrulr}
+━━━━━━━━━━━━━━━`;
 
-            const nowMoment = moment().tz('Asia/Dhaka');
-            const hour = nowMoment.hour();
-            const minute = nowMoment.format('mm');
-            const period = getBengaliPeriod(hour);
-
-            const formattedTime = `${period} ${hour % 12 === 0 ? 12 : hour % 12}:${minute} ${nowMoment.format('A')}`;
-
-            const message = messages[h] || '⏰ সময় চলে যাচ্ছে! কিছু productive করো ✨';
-            const extra = extraLines[Math.floor(Math.random() * extraLines.length)];
-
-            const finalMessage =
-`━━━━━━━━━━━━━━━━━━━━━
-🕒 এখন সময়: ${formattedTime}
-${message}
-
-${extra}
-━━━━━━━━━━━━━━━━━━━━━`;
-
-            global.data.allThreadID.forEach(threadID => {
-                api.sendMessage(finalMessage, threadID, (error) => {
-                    if (error) {
-                        console.error(`Failed to send message to ${threadID}:`, error);
-                    }
-                });
-            });
-
-            console.log(chalk.hex("#00FFFF")(`Scheduled (BDT): ${formattedTime} => ${finalMessage}`));
-        });
+    const nazruld = nazrul.find(item => item.timer === matchTime);
+    if (nazruld) {
+      const Mdnazrul = `${islamickChat}\n${nazruld.message.join("\n")}\n𝐂𝐫𝐞𝐚𝐭𝐨𝐫 ━➢ 𝐈𝐬𝐥𝐚𝐦𝐢𝐜𝐤 𝐂𝐡𝐚𝐭`;
+      global.data.allThreadID.forEach(threadID => {
+        api.sendMessage(Mdnazrul, threadID);
+      });
     }
+  }, 1000); 
 };
 
-module.exports.run = () => {
-    // Main logic is in onLoad
-};
+module.exports.run = () => {};
