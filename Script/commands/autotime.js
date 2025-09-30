@@ -1,23 +1,18 @@
 const moment = require("moment-timezone");
+require("moment-hijri");
 
 module.exports.config = {
   name: "autotime",
-  version: "5.1.0",
+  version: "6.0.0",
   hasPermssion: 2,
   credits: "ALVI + Saiful Edit",
-  description: "বট চালু হলেই প্রতি ঘন্টা সময়, বাংলা তারিখ ও দোয়া পাঠাবে",
+  description: "বট চালু হলেই প্রতি ঘন্টা সময়, বাংলা, হিজরি তারিখ ও দোয়া পাঠাবে",
   commandCategory: "system",
   usages: "autotime",
   cooldowns: 5,
 };
 
 const runningGroups = new Set();
-
-// বাংলা মাস
-const banglaMonths = [
-  "বৈশাখ", "জ্যৈষ্ঠ", "আষাঢ়", "শ্রাবণ", "ভাদ্র", "আশ্বিন",
-  "কার্তিক", "অগ্রহায়ণ", "পৌষ", "মাঘ", "ফাল্গুন", "চৈত্র"
-];
 
 const banglaWeekdays = [
   "রবিবার", "সোমবার", "মঙ্গলবার",
@@ -30,19 +25,16 @@ function toBanglaNumber(number) {
   return number.toString().replace(/\d/g, d => banglaDigits[d]);
 }
 
-// বাংলা তারিখ ফাংশন
+// বাংলা তারিখ ফাংশন (সঠিক মাস ও বছর হ্যান্ডেল)
 function getBanglaDate(now) {
   const gDate = now.date();
-  const gMonth = now.month(); // 0-11
+  const gMonth = now.month(); // 0 = জানুয়ারি
   const gYear = now.year();
 
-  // বাংলা সাল (গ্রেগরিয়ান সাল - 593)
   let banglaYear = gYear - 593;
-
   let banglaMonth = "";
   let banglaDay = gDate;
 
-  // বাংলা মাস নির্ধারণ (গ্রেগরিয়ান -> বাংলা)
   if ((gMonth === 3 && gDate >= 14) || (gMonth === 4 && gDate <= 14)) {
     banglaMonth = "বৈশাখ";
     if (gMonth === 3 && gDate >= 14) banglaYear++;
@@ -70,8 +62,12 @@ function getBanglaDate(now) {
     banglaDay = (gMonth === 10) ? gDate - 15 : gDate + 16;
   } else if ((gMonth === 11 && gDate >= 16) || (gMonth === 0 && gDate <= 14)) {
     banglaMonth = "পৌষ";
-    if (gMonth === 0 && gDate <= 14) banglaYear--;
-    banglaDay = (gMonth === 11) ? gDate - 15 : gDate + 16;
+    if (gMonth === 11 && gDate >= 16) {
+      banglaDay = gDate - 15;
+    } else {
+      banglaDay = gDate + 16;
+      banglaYear--;
+    }
   } else if ((gMonth === 0 && gDate >= 15) || (gMonth === 1 && gDate <= 13)) {
     banglaMonth = "মাঘ";
     banglaDay = (gMonth === 0) ? gDate - 14 : gDate + 17;
@@ -87,6 +83,12 @@ function getBanglaDate(now) {
   return `${toBanglaNumber(banglaDay)} ${banglaMonth}, ${toBanglaNumber(banglaYear)} (${weekday})`;
 }
 
+// হিজরি তারিখ
+function getHijriDate(now) {
+  const hijri = moment(now).tz("Asia/Dhaka").format("iD iMMMM, iYYYY");
+  return hijri.replace(/\d/g, d => "০১২৩৪৫৬৭৮৯"[d]);
+}
+
 // সময় পাঠানোর ফাংশন
 function sendTime(api, threadID) {
   if (!runningGroups.has(threadID)) return;
@@ -96,6 +98,7 @@ function sendTime(api, threadID) {
   const time = now.format("hh:mm A");
   const date = now.format("DD/MM/YYYY, dddd");
   const banglaDate = getBanglaDate(now);
+  const hijriDate = getHijriDate(now);
 
   const msg = `
   ╔═❖═❖═❖═❖═❖═❖═╗
@@ -106,6 +109,7 @@ function sendTime(api, threadID) {
      ╚════════╝
 📅 ইংরেজি তারিখ: ${date}
 🗓️ বাংলা তারিখ: ${banglaDate}
+🕌 হিজরি তারিখ: ${hijriDate}
 🌍 টাইমজোন: ${timeZone}
 ━━━━━━━━━━━━━━━━━━━━
 ✨ আল্লাহর নিকটে বেশি বেশি দোয়া করুন..! 
@@ -114,7 +118,7 @@ function sendTime(api, threadID) {
 ━━━━━━━━━━━━━━━━━━━━
 🌸✨🌙🕊️🌼🌿🕌💖🌙🌸✨🌺
 
-🌟 𝐂𝐫𝐞𝐚𝐭𝐨𝐫 ━ 𝐒𝐚𝐢𝐟𝐮𝐥 𝐈𝐬𝐥𝐚𝐦 🌟
+🌟 𝐂𝐫𝐞𝐚𝐭𝐨𝐫 ━ 𝐒𝐚𝐢𝐟𝐮𝐥 𝐈𝐬𝐥𝐚𝐮 🌟
 `;
 
   api.sendMessage(msg, threadID);
