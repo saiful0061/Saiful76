@@ -1,6 +1,7 @@
 // azan.js
-// Auto Azan notification in ALL groups (Dynamic time version, Dohar Location)
+// Auto Azan notification in ALL groups 
 // File: modules/commands/azan.js
+(Dynamic time version, Dohar Location)
 
 const schedule = require("node-schedule");
 const { PrayerTimes, CalculationMethod, Madhab, Coordinates } = require("adhan");
