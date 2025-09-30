@@ -2,7 +2,7 @@ const moment = require("moment-timezone");
 
 module.exports.config = {
   name: "autotime",
-  version: "5.0.0",
+  version: "5.1.0",
   hasPermssion: 2,
   credits: "ALVI + Saiful Edit",
   description: "বট চালু হলেই প্রতি ঘন্টা সময়, বাংলা তারিখ ও দোয়া পাঠাবে",
@@ -13,7 +13,7 @@ module.exports.config = {
 
 const runningGroups = new Set();
 
-// বাংলা মাস ও বার ম্যানুয়ালি সেট
+// বাংলা মাস
 const banglaMonths = [
   "বৈশাখ", "জ্যৈষ্ঠ", "আষাঢ়", "শ্রাবণ", "ভাদ্র", "আশ্বিন",
   "কার্তিক", "অগ্রহায়ণ", "পৌষ", "মাঘ", "ফাল্গুন", "চৈত্র"
@@ -24,32 +24,70 @@ const banglaWeekdays = [
   "বুধবার", "বৃহস্পতিবার", "শুক্রবার", "শনিবার"
 ];
 
-// বাংলা তারিখ কনভার্টার
-function toBanglaDate(dateObj) {
+// সংখ্যা বাংলায় কনভার্ট
+function toBanglaNumber(number) {
   const banglaDigits = ["০","১","২","৩","৪","৫","৬","৭","৮","৯"];
-  return dateObj.toString().replace(/\d/g, d => banglaDigits[d]);
+  return number.toString().replace(/\d/g, d => banglaDigits[d]);
 }
 
+// বাংলা তারিখ ফাংশন
 function getBanglaDate(now) {
-  // Approximate Bangla calendar (not 100% accurate, simple conversion)
   const gDate = now.date();
   const gMonth = now.month(); // 0-11
   const gYear = now.year();
 
-  // বাংলা সাল (approx, গ্রেগরিয়ান সাল - 593)
-  const banglaYear = gYear - 593;
+  // বাংলা সাল (গ্রেগরিয়ান সাল - 593)
+  let banglaYear = gYear - 593;
 
-  // বাংলা মাস গাণিতিকভাবে ম্যাপ করা (সিম্পল, নিখুঁত না)
-  const banglaMonth = banglaMonths[gMonth % 12];
+  let banglaMonth = "";
+  let banglaDay = gDate;
 
-  // বাংলা দিন
-  const banglaDay = gDate;
+  // বাংলা মাস নির্ধারণ (গ্রেগরিয়ান -> বাংলা)
+  if ((gMonth === 3 && gDate >= 14) || (gMonth === 4 && gDate <= 14)) {
+    banglaMonth = "বৈশাখ";
+    if (gMonth === 3 && gDate >= 14) banglaYear++;
+    banglaDay = (gMonth === 3) ? gDate - 13 : gDate + 17;
+  } else if ((gMonth === 4 && gDate >= 15) || (gMonth === 5 && gDate <= 14)) {
+    banglaMonth = "জ্যৈষ্ঠ";
+    banglaDay = (gMonth === 4) ? gDate - 14 : gDate + 17;
+  } else if ((gMonth === 5 && gDate >= 15) || (gMonth === 6 && gDate <= 15)) {
+    banglaMonth = "আষাঢ়";
+    banglaDay = (gMonth === 5) ? gDate - 14 : gDate + 16;
+  } else if ((gMonth === 6 && gDate >= 16) || (gMonth === 7 && gDate <= 15)) {
+    banglaMonth = "শ্রাবণ";
+    banglaDay = (gMonth === 6) ? gDate - 15 : gDate + 16;
+  } else if ((gMonth === 7 && gDate >= 16) || (gMonth === 8 && gDate <= 15)) {
+    banglaMonth = "ভাদ্র";
+    banglaDay = (gMonth === 7) ? gDate - 15 : gDate + 16;
+  } else if ((gMonth === 8 && gDate >= 16) || (gMonth === 9 && gDate <= 15)) {
+    banglaMonth = "আশ্বিন";
+    banglaDay = (gMonth === 8) ? gDate - 15 : gDate + 15;
+  } else if ((gMonth === 9 && gDate >= 16) || (gMonth === 10 && gDate <= 15)) {
+    banglaMonth = "কার্তিক";
+    banglaDay = (gMonth === 9) ? gDate - 15 : gDate + 16;
+  } else if ((gMonth === 10 && gDate >= 16) || (gMonth === 11 && gDate <= 15)) {
+    banglaMonth = "অগ্রহায়ণ";
+    banglaDay = (gMonth === 10) ? gDate - 15 : gDate + 16;
+  } else if ((gMonth === 11 && gDate >= 16) || (gMonth === 0 && gDate <= 14)) {
+    banglaMonth = "পৌষ";
+    if (gMonth === 0 && gDate <= 14) banglaYear--;
+    banglaDay = (gMonth === 11) ? gDate - 15 : gDate + 16;
+  } else if ((gMonth === 0 && gDate >= 15) || (gMonth === 1 && gDate <= 13)) {
+    banglaMonth = "মাঘ";
+    banglaDay = (gMonth === 0) ? gDate - 14 : gDate + 17;
+  } else if ((gMonth === 1 && gDate >= 14) || (gMonth === 2 && gDate <= 14)) {
+    banglaMonth = "ফাল্গুন";
+    banglaDay = (gMonth === 1) ? gDate - 13 : gDate + 17;
+  } else {
+    banglaMonth = "চৈত্র";
+    banglaDay = (gMonth === 2) ? gDate - 14 : gDate + 17;
+  }
 
   const weekday = banglaWeekdays[now.day()];
-
-  return `${toBanglaDate(banglaDay)} ${banglaMonth}, ${toBanglaDate(banglaYear)} (${weekday})`;
+  return `${toBanglaNumber(banglaDay)} ${banglaMonth}, ${toBanglaNumber(banglaYear)} (${weekday})`;
 }
 
+// সময় পাঠানোর ফাংশন
 function sendTime(api, threadID) {
   if (!runningGroups.has(threadID)) return;
 
