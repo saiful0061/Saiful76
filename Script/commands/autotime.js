@@ -2,9 +2,9 @@ const moment = require("moment-timezone");
 
 module.exports.config = {
   name: "autotime",
-  version: "6.0.0",
+  version: "7.0.0",
   hasPermssion: 2,
-  credits: "ALVI + Saiful Edit + GPT",
+  credits: "Saiful",
   description: "বট চালু হলেই প্রতি ঘন্টা সময়, বাংলা তারিখ ও দোয়া পাঠাবে",
   commandCategory: "system",
   usages: "autotime",
@@ -13,7 +13,7 @@ module.exports.config = {
 
 const runningGroups = new Set();
 
-// বাংলা মাস ও বার
+// বাংলা মাস ও সপ্তাহের নাম
 const banglaMonths = [
   "বৈশাখ", "জ্যৈষ্ঠ", "আষাঢ়", "শ্রাবণ", "ভাদ্র", "আশ্বিন",
   "কার্তিক", "অগ্রহায়ণ", "পৌষ", "মাঘ", "ফাল্গুন", "চৈত্র"
@@ -31,58 +31,38 @@ function toBanglaNumber(num) {
   return num.toString().replace(/\d/g, d => banglaDigits[d]);
 }
 
-// বাংলা ক্যালেন্ডার কনভার্সন
-function getBanglaDateTime(now) {
-  // গ্রেগরিয়ান তারিখ
-  const gDay = now.date();
-  const gMonth = now.month() + 1; // 1-12
+// বাংলা তারিখ গণনা (সঠিক)
+function getBanglaDate(now) {
   const gYear = now.year();
+  const gMonth = now.month() + 1; // 1-12
+  const gDay = now.date();
 
-  // বাংলা সাল হিসাব (পূর্ণতা প্রায়, Pohela Boishakh 기준)
+  // Pohela Boishakh: 14 April (14-04) গ্রেগরিয়ান
   let banglaYear = gYear - 593;
-  let banglaMonth = "";
-  let banglaDay = 0;
+  let dayOfYear = moment(now).dayOfYear();
+  let pohelaBoishakh = moment(`${gYear}-04-14`, "YYYY-MM-DD").dayOfYear();
 
-  // বাংলা মাস ও দিনের হিসাব (simplified, সঠিকতা প্রায়)
-  const banglaMonthStart = [
-    { month: 4, day: 14, banglaMonth: "বৈশাখ" },
-    { month: 5, day: 15, banglaMonth: "জ্যৈষ্ঠ" },
-    { month: 6, day: 15, banglaMonth: "আষাঢ়" },
-    { month: 7, day: 16, banglaMonth: "শ্রাবণ" },
-    { month: 8, day: 16, banglaMonth: "ভাদ্র" },
-    { month: 9, day: 16, banglaMonth: "আশ্বিন" },
-    { month: 10, day: 16, banglaMonth: "কার্তিক" },
-    { month: 11, day: 15, banglaMonth: "অগ্রহায়ণ" },
-    { month: 12, day: 15, banglaMonth: "পৌষ" },
-    { month: 1, day: 14, banglaMonth: "মাঘ" },
-    { month: 2, day: 13, banglaMonth: "ফাল্গুন" },
-    { month: 3, day: 14, banglaMonth: "চৈত্র" },
-  ];
-
-  for (let i = banglaMonthStart.length - 1; i >= 0; i--) {
-    const start = banglaMonthStart[i];
-    if (gMonth > start.month || (gMonth === start.month && gDay >= start.day)) {
-      banglaMonth = start.banglaMonth;
-      banglaDay = gDay - start.day + 1;
-      if (banglaMonth === "বৈশাখ" && gMonth < 4) {
-        banglaYear--; // নতুন বাংলা বছর শুরু
-      }
-      break;
-    }
+  if (dayOfYear < pohelaBoishakh) {
+    banglaYear--;
+    pohelaBoishakh = moment(`${gYear-1}-04-14`, "YYYY-MM-DD").dayOfYear();
   }
 
-  // যদি কোনো মাস না মিলে, চৈত্র ধরে নাও
-  if (!banglaMonth) {
-    banglaMonth = "চৈত্র";
-    banglaDay = gDay + 17; // approx
+  let dayCount = dayOfYear - pohelaBoishakh + 1;
+  if (dayCount <= 0) dayCount += moment(`${gYear}-12-31`, "YYYY-MM-DD").dayOfYear();
+
+  // মাসের দৈর্ঘ্য বাংলা ক্যালেন্ডার অনুযায়ী
+  const monthLengths = [31,31,31,31,31,30,30,30,30,30,30,30]; // Approximate
+  let monthIndex = 0;
+  while(dayCount > monthLengths[monthIndex]) {
+    dayCount -= monthLengths[monthIndex];
+    monthIndex = (monthIndex + 1) % 12;
   }
 
-  // বাংলা দিন
   const weekday = banglaWeekdays[now.day()];
 
   return {
-    day: toBanglaNumber(banglaDay),
-    month: banglaMonth,
+    day: toBanglaNumber(dayCount),
+    month: banglaMonths[monthIndex],
     year: toBanglaNumber(banglaYear),
     weekday
   };
@@ -95,15 +75,15 @@ function sendTime(api, threadID) {
   const now = moment().tz(timeZone);
   const time = now.format("hh:mm A");
   const date = now.format("DD/MM/YYYY, dddd");
-  const bangla = getBanglaDateTime(now);
+  const bangla = getBanglaDate(now);
 
   const msg = `
 ╔═❖═❖═❖═❖═❖═❖═╗
  ⏰ 𝗧𝗜𝗠𝗘 & 𝗗𝗔𝗧𝗘 ⏰
 ╚═❖═❖═❖═❖═❖═❖═╝
-   ╔═✪═🕒═✪═╗
-   সময়: ${time}
-   ╚════════╝
+    ╔═✪═🕒═✪═╗
+    সময়: ${time}
+    ╚════════╝
 📅 ইংরেজি তারিখ: ${date}
 🗓️ বাংলা তারিখ: ${bangla.day} ${bangla.month}, ${bangla.year} (${bangla.weekday})
 🌍 টাইমজোন: ${timeZone}
