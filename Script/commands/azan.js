@@ -1,15 +1,16 @@
 // azan.js
-// Auto Azan notification in ALL groups (Manual time version)
+// Auto Azan notification in ALL groups (Dynamic time version, Dohar Location)
 // File: modules/commands/azan.js
 
 const schedule = require("node-schedule");
+const { PrayerTimes, CalculationMethod, Madhab, Coordinates } = require("adhan");
 
 module.exports.config = {
   name: "azan",
-  version: "3.5.0",
+  version: "4.1.0",
   hasPermssion: 0,
   credits: "Akash + Saiful Edit",
-  description: "প্রতিদিন আজান ও নামাজের সময় সব গ্রুপে অটো নোটিফিকেশন পাঠাবে",
+  description: "প্রতিদিন আজান ও নামাজের সময় সব গ্রুপে অটো নোটিফিকেশন পাঠাবে (Dynamic, Dohar)",
   commandCategory: "Islamic",
   usages: "অটো রান",
   cooldowns: 5
@@ -17,80 +18,93 @@ module.exports.config = {
 
 let jobs = [];
 
+// ✅ দোহার, ঢাকা লোকেশন
+const coordinates = new Coordinates(23.5931, 90.1425);
+const params = CalculationMethod.MuslimWorldLeague();
+params.madhab = Madhab.Hanafi;
+
 module.exports.onLoad = async function({ api }) {
-  // আজানের টাইম (বাংলাদেশ স্ট্যান্ডার্ড টাইম)
-  const prayerTimes = {
-    "তাহাজ্জুদ": { time: "02:30", msg: 
+
+  function scheduleForToday() {
+    const date = new Date();
+    const prayerTimes = new PrayerTimes(coordinates, date, params);
+
+    const times = {
+      "তাহাজ্জুদ": { time: prayerTimes.fajr, offset: -120, msg: 
 `╔═❖🌌❖═╗
 🕌 তাহাজ্জুদ নামাজ
 ╚═❖🌌❖═╝
 ✨ রাতের শেষ ভাগের সেরা ইবাদত।
 ✨ যারা তাহাজ্জুদ পড়ে, আল্লাহ তাদের দোয়া কবুল করেন।
-🌟 𝐂𝐫𝐞𝐚𝐭𝐨𝐫 ━ 𝐒𝐚𝐢𝐟𝐮𝐥 𝐈𝐬𝐥𝐚𝐦 🌟` },
+🌟 𝐂𝐫𝐞𝐚𝐭𝗼𝗿 ━ 𝐒𝐚𝐢𝐟𝐮𝐥 𝐈𝐬𝐥𝐚𝐦 🌟` },
 
-    "ফজর": { time: "04:24", msg: 
+      "ফজর": { time: prayerTimes.fajr, msg: 
 `╔═❖🌅❖═╗
 🕌 ফজর নামাজ
 ╚═❖🌅❖═╝
 ✨ ঘুম ভাঙার পর যে সেজদা, সেটাই আসল বিজয়।
 ✨ ভোরের আলোয় নামাজ মানে রহমত আর প্রশান্তি।
-🌟 𝐂𝐫𝐞𝐚𝐭𝐨𝐫 ━ 𝐒𝐚𝐢𝐟𝐮𝐥 𝐈𝐬𝐥𝐚𝐦 🌟` },
+🌟 𝐂𝐫𝐞𝐚𝐭𝗼𝗿 ━ 𝐒𝐚𝐢𝐟𝐮𝐥 𝐈𝐬𝐥𝐚𝐦 🌟` },
 
-    "যোহর": { time: "13:00", msg: 
+      "যোহর": { time: prayerTimes.dhuhr, msg: 
 `╔═❖☀️❖═╗
 🕌 যোহর নামাজ
 ╚═❖☀️❖═╝
 ✨ দিনের ব্যস্ততার মাঝেই শান্তির ডাক।
 ✨ রোদের তাপে সেজদা মানে ঠাণ্ডা সুখ।
-🌟 𝐂𝐫𝐞𝐚𝐭𝐨𝐫 ━ 𝐒𝐚𝐢𝐟𝐮𝐥 𝐈𝐬𝐥𝐚𝐦 🌟` },
+🌟 𝐂𝐫𝐞𝐚𝐭𝗼𝗿 ━ 𝐒𝐚𝐢𝐟𝐮𝐥 𝐈𝐬𝐥𝐚𝐦 🌟` },
 
-    "আসর": { time: "16:30", msg: 
+      "আসর": { time: prayerTimes.asr, msg: 
 `╔═❖🌇❖═╗
 🕌 আসর নামাজ
 ╚═❖🌇❖═╝
 ✨ বিকেলের সোনালী আলোয় দোয়ার শান্তি।
 ✨ আসর ছাড়া দিনের ইবাদত অসম্পূর্ণ।
-🌟 𝐂𝐫𝐞𝐚𝐭𝐨𝐫 ━ 𝐒𝐚𝐢𝐟𝐮𝐥 𝐈𝐬𝐥𝐚𝐦 🌟` },
+🌟 𝐂𝐫𝐞𝐚𝐭𝗼𝗿 ━ 𝐒𝐚𝐢𝐟𝐮𝐥 𝐈𝐬𝐥𝐚𝐦 🌟` },
 
-    "মাগরিব": { time: "18:06", msg: 
+      "মাগরিব": { time: prayerTimes.maghrib, msg: 
 `╔═❖🌙❖═╗
 🕌 মাগরিব নামাজ
 ╚═❖🌙❖═╝
 ✨ সূর্যাস্তের পর প্রথম সেজদার নূর।
 ✨ মাগরিবেই দিনের ক্লান্তি মুছে যায়।
-🌟 𝐂𝐫𝐞𝐚𝐭𝐨𝐫 ━ 𝐒𝐚𝐢𝐟𝐮𝐥 𝐈𝐬𝐥𝐚𝐦 🌟` },
+🌟 𝐂𝐫𝐞𝐚𝐭𝗼𝗿 ━ 𝐒𝐚𝐢𝐟𝐮𝐥 𝐈𝐬𝐥𝐚𝐦 🌟` },
 
-    "ইশা": { time: "20:40", msg: 
+      "ইশা": { time: prayerTimes.isha, msg: 
 `╔═❖🌌❖═╗
 🕌 ইশা নামাজ
 ╚═❖🌌❖═╝
 ✨ রাতের আঁধারে সেরা ইবাদতের প্রশান্তি।
 ✨ ইশার সেজদা মানে ঘুমানোর আগে জান্নাতের প্রস্তুতি।
-🌟 𝐂𝐫𝐞𝐚𝐭𝐨𝐫 ━ 𝐒𝐚𝐢𝐟𝐮𝐥 𝐈𝐬𝐥𝐚𝐦 🌟` }
-  };
+🌟 𝐂𝐫𝐞𝐚𝐭𝗼𝗿 ━ 𝐒𝐚𝐢𝐟𝐮𝐥 𝐈𝐬𝐥𝐚𝐦 🌟` }
+    };
 
-  // প্রতিদিনের ওয়াক্ত
-  for (let [prayer, { time, msg }] of Object.entries(prayerTimes)) {
-    const [hour, minute] = time.split(":").map(Number);
+    for (const job of jobs) job.cancel();
+    jobs = [];
 
-    const job = schedule.scheduleJob({ hour, minute, tz: "Asia/Dhaka" }, function () {
-      const today = new Date();
-      const day = today.getDay(); // Sunday = 0 ... Friday = 5
+    for (let [prayer, data] of Object.entries(times)) {
+      let notifyTime = new Date(data.time);
+      if (data.offset) notifyTime.setMinutes(notifyTime.getMinutes() + data.offset);
 
-      // শুক্রাবার হলে যোহর স্কিপ করতে হবে
-      if (day === 5 && prayer === "যোহর") return;
+      const hour = notifyTime.getHours();
+      const minute = notifyTime.getMinutes();
 
-      for (const threadID of global.data.allThreadID) {
-        api.sendMessage(msg, threadID);
-      }
-    });
+      const job = schedule.scheduleJob({ hour, minute, tz: "Asia/Dhaka" }, function () {
+        const today = new Date();
+        const day = today.getDay();
+        if (day === 5 && prayer === "যোহর") return;
 
-    jobs.push(job);
-  }
+        for (const threadID of global.data.allThreadID) {
+          api.sendMessage(data.msg, threadID);
+        }
+      });
 
-  // জুমার নামাজ (শুধু শুক্রবার 12:45 এ)
-  const jumuahJob = schedule.scheduleJob({ dayOfWeek: 5, hour: 12, minute: 45, tz: "Asia/Dhaka" }, function () {
-    const jumuahMsg = 
+      jobs.push(job);
+    }
+
+    // জুমা
+    const jumuahJob = schedule.scheduleJob({ dayOfWeek: 5, hour: 12, minute: 45, tz: "Asia/Dhaka" }, function () {
+      const jumuahMsg =
 `╔═❖🕌❖═╗
 ✨ জুমার নামাজ ✨
 ╚═❖🕌❖═╝
@@ -100,16 +114,18 @@ module.exports.onLoad = async function({ api }) {
 📖 সূরা কাহফ পড়তে ভুলবেন না।
 🌟 𝐂𝐫𝐞𝐚𝐭𝗼𝗿 ━ 𝐒𝐚𝐢𝐟𝐮𝐥 𝐈𝐬𝐥𝐚𝐦 🌟`;
 
-    for (const threadID of global.data.allThreadID) {
-      api.sendMessage(jumuahMsg, threadID);
-    }
-  });
+      for (const threadID of global.data.allThreadID) {
+        api.sendMessage(jumuahMsg, threadID);
+      }
+    });
 
-  jobs.push(jumuahJob);
+    jobs.push(jumuahJob);
+  }
 
-  console.log("✅ আজান নোটিফিকেশন + তাহাজ্জুদ + জুমার সিস্টেম চালু হয়েছে (সব গ্রুপে)।");
+  scheduleForToday();
+  schedule.scheduleJob({ hour: 0, minute: 5, tz: "Asia/Dhaka" }, scheduleForToday);
+
+  console.log("✅ আজান নোটিফিকেশন (Dynamic, Dohar) চালু হয়েছে।");
 };
 
-module.exports.run = async function() {
-  // কোনো কমান্ড দরকার নেই, অটো চলবে
-};
+module.exports.run = async function() {};
