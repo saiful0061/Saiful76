@@ -2,7 +2,7 @@ const moment = require("moment-timezone");
 
 module.exports.config = {
   name: "time",
-  version: "4.0.0",
+  version: "4.1.0",
   hasPermssion: 0,
   credits: "Mohammad Akash + Saiful Edit",
   description: "Displays current time, Bangla date and bot runtime with caption.",
@@ -33,9 +33,8 @@ const banglaWeekdays = [
   "বৃহস্পতিবার", "শুক্রবার", "শনিবার"
 ];
 
-// 🔹 মাস অনুযায়ী দিন সংখ্যা (বাংলা ক্যালেন্ডার)
+// 🔹 মাস অনুযায়ী দিন সংখ্যা
 const monthDays = [31,31,31,31,31,30,30,30,30,30,29,30]; 
-// ফাল্গুন ২৯ দিন, লিপ ইয়ারে ৩০ দিন
 
 module.exports.run = async function({ api, event }) {
   const { threadID } = event;
@@ -57,24 +56,49 @@ module.exports.run = async function({ api, event }) {
   const engYear = now.year();
 
   // বাংলা তারিখ ক্যালকুলেশন
-  let banglaDay = engDate - 13;
-  let banglaMonth = engMonth;
   let banglaYear = engYear - 593;
+  let banglaMonth, banglaDay;
 
-  if (banglaDay <= 0) {
-    banglaMonth -= 1;
-    if (banglaMonth < 0) {
-      banglaMonth = 11;
-      banglaYear -= 1;
-    }
-    banglaDay = monthDays[banglaMonth] + banglaDay;
+  // মাস রূপান্তর (এপ্রিল 14 থেকে বৈশাখ শুরু)
+  if (engMonth < 3 || (engMonth === 3 && engDate < 14)) {
+    banglaYear -= 1;
   }
 
+  // ইংরেজি মাসের ভিত্তিতে বাংলা মাস নির্ধারণ
+  const banglaMonthStart = [
+    [3,14], // বৈশাখ - এপ্রিল 14
+    [4,15], // জ্যৈষ্ঠ - মে 15
+    [5,15], // আষাঢ় - জুন 15
+    [6,16], // শ্রাবণ - জুলাই 16
+    [7,17], // ভাদ্র - আগস্ট 17
+    [8,17], // আশ্বিন - সেপ্টেম্বর 17
+    [9,17], // কার্তিক - অক্টোবর 17
+    [10,16],// অগ্রহায়ণ - নভেম্বর 16
+    [11,16],// পৌষ - ডিসেম্বর 16
+    [0,15], // মাঘ - জানুয়ারি 15
+    [1,13], // ফাল্গুন - ফেব্রুয়ারি 13/14
+    [2,15]  // চৈত্র - মার্চ 15
+  ];
+
+  // বাংলা মাস ঠিক করা
+  for (let i = 0; i < 12; i++) {
+    let [m, d] = banglaMonthStart[i];
+    if ((engMonth > m) || (engMonth === m && engDate >= d)) {
+      banglaMonth = i;
+    }
+  }
+  if (banglaMonth === undefined) banglaMonth = 11;
+
+  // দিন ক্যালকুলেশন
+  let [startMonth, startDate] = banglaMonthStart[banglaMonth];
+  let start = moment(`${engYear}-${startMonth+1}-${startDate}`, "YYYY-M-D").tz("Asia/Dhaka");
+  banglaDay = now.diff(start, "days") + 1;
+
   // ফাল্গুন লিপ ইয়ার ঠিক করা
-  if (banglaMonth === 11) { 
+  if (banglaMonth === 11) {
     const isLeap = ((engYear % 400 === 0) || (engYear % 4 === 0 && engYear % 100 !== 0));
     if (isLeap && banglaDay === 30) {
-      banglaDay = 30; // লিপ ইয়ার হলে ফাল্গুন ৩০ দিন
+      banglaDay = 30;
     }
   }
 
