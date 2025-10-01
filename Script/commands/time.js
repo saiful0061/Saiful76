@@ -4,10 +4,10 @@ const moment = require("moment-timezone");
 
 module.exports.config = {
   name: "time",
-  version: "1.0.5",
+  version: "2.0.0",
   hasPermssion: 0,
-  credits: "Mohammad Akash",
-  description: "Displays current time and bot runtime with owner mention.",
+  credits: "Mohammad Akash + Saiful Edit",
+  description: "Displays current time and bot runtime with caption and owner mention.",
   commandCategory: "Info",
   cooldowns: 1,
   dependencies: {
@@ -28,37 +28,41 @@ module.exports.run = async function({ api, event }) {
 
   // ঢাকার সময়
   const now = moment.tz("Asia/Dhaka");
-  const timeStr = now.format("hh:mm A");
-  const dateStr = now.format("DD-MM-YYYY");
+  const time = now.format("hh:mm A");
+  const date = now.format("DD-MM-YYYY, dddd");
 
-  // হিজরী ডেট (উদাহরণ হিসাবে)
-  const hijriDate = "[Sunday 6th Ashwin 1432]";
+  // বাংলা তারিখ (ডেমো)
+  const banglaDate = "১৬ আশ্বিন, ১৪৩২ (রবিবার)";
 
-  // Bot Owner ID
+  // Owner Info
   const ownerID = "100078049308655";
+  let ownerName = "🌟 𝐂𝐫𝐞𝐚𝐭𝗼𝐫 ━ 𝐒𝐚𝐢𝐟𝐮𝐥 𝐈𝐬𝐥𝐚𝐦 🌟";
 
-  // মেসেজ পাঠানোর আগে গ্রুপ মেম্বার চেক করা
-  let ownerText = "Mohammad Akash"; // ডিফল্ট
-  try {
-    const threadInfo = await api.getThreadInfo(threadID);
-    const memberIDs = threadInfo.participantIDs || [];
-    if (memberIDs.includes(ownerID)) {
-      ownerText = { tag: "Mohammad Akash", id: ownerID }; // মেনশন
-    }
-  } catch (err) {
-    console.log(err);
-  }
-
-  // মেসেজ ফরম্যাট
-  const message = `
-____❮ 𝙲𝚊𝚕𝚎𝚗𝚍𝚎𝚛 ❯____
-• 𝐓𝐢𝐦𝐞 : ${timeStr} ⏰
-• 𝐃𝐚𝐭𝐞 : ${dateStr}
-• 𝐇𝐢𝐣𝐫𝐢 𝐃𝐚𝐭𝐞 : ${hijriDate}
-• 𝐁𝐨𝐭 𝐔𝐩𝐭𝐢𝐦𝐞 : ${hours} hour(s), ${minutes} minute(s), ${seconds} second(s)
-
-• 𝙱𝚘𝚝 𝙾𝚠𝚗𝚎𝚛 - ${ownerText}
+  // কেপশন
+  const caption = `
+🌟 আল্লাহর আশীর্বাদ সর্বদা আপনার সাথে থাকুক..!
+🕌 নামাজ নিয়মিত পড়ুন..!
+🌙 দোয়া করতে ভুলবেন না..!
+🤝 মানুষের সাথে সদয় থাকুন..!
+💫 জীবন আলোকিত ও বরকতপূর্ণ হোক..!
 `;
 
-  api.sendMessage(message, threadID);
+  // ফাইনাল মেসেজ
+  const message = 
+`╔══════════════════════╗
+        ❮ 𝙲𝚊𝚕𝚎𝚗𝚍𝚎𝚛 ❯
+╚══════════════════════╝
+
+🕒 𝗧𝗶𝗺𝗲       : ${time}
+📅 𝗗𝗮𝘁𝗲       : ${date}
+🗓️ বাংলা তারিখ : ${banglaDate}
+⏳ 𝗕𝗼𝘁 𝗨𝗽𝘁𝗶𝗺𝗲 : ${hours} hour(s), ${minutes} minute(s), ${seconds} second(s)
+
+━━━━━━━━━━━━━━━━━━━━
+${caption}
+━━━━━━━━━━━━━━━━━━━━
+
+👑 𝗕𝗼𝘁 𝗢𝘄𝗻𝗲𝗿 : ${ownerName}`;
+
+  return api.sendMessage(message, threadID);
 };
