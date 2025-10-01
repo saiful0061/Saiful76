@@ -1,5 +1,4 @@
 const moment = require("moment-timezone");
-const { BanglaDate } = require("bangla-calendar"); // 🔹 বাংলা তারিখ কনভার্টার
 
 module.exports.config = {
   name: "time",
@@ -22,6 +21,22 @@ function engToBanglaNumber(number) {
   return str;
 }
 
+// 🔹 বাংলা মাস
+const banglaMonths = [
+  "বৈশাখ", "জ্যৈষ্ঠ", "আষাঢ়", "শ্রাবণ", "ভাদ্র", "আশ্বিন",
+  "কার্তিক", "অগ্রহায়ণ", "পৌষ", "মাঘ", "ফাল্গুন", "চৈত্র"
+];
+
+// 🔹 বাংলা বার
+const banglaWeekdays = [
+  "রবিবার", "সোমবার", "মঙ্গলবার", "বুধবার",
+  "বৃহস্পতিবার", "শুক্রবার", "শনিবার"
+];
+
+// 🔹 মাস অনুযায়ী দিন সংখ্যা (বাংলা ক্যালেন্ডার)
+const monthDays = [31,31,31,31,31,30,30,30,30,30,29,30]; 
+// ফাল্গুন ২৯ দিন, লিপ ইয়ারে ৩০ দিন
+
 module.exports.run = async function({ api, event }) {
   const { threadID } = event;
 
@@ -36,14 +51,34 @@ module.exports.run = async function({ api, event }) {
   const time = now.format("hh:mm A");
   const date = now.format("DD-MM-YYYY, dddd");
 
-  // 🔹 বাংলা তারিখ (লাইব্রেরি ব্যবহার করে)
-  const bd = new BanglaDate(now.toDate());
-  const banglaDay = engToBanglaNumber(bd.getDate());
-  const banglaMonth = bd.getMonthName();
-  const banglaYear = engToBanglaNumber(bd.getYear());
-  const banglaWeekday = bd.getDayName();
+  // ইংরেজি তারিখ
+  const engDate = now.date();
+  const engMonth = now.month(); // 0–11
+  const engYear = now.year();
 
-  const banglaDate = `${banglaDay} ${banglaMonth}, ${banglaYear} (${banglaWeekday})`;
+  // বাংলা তারিখ ক্যালকুলেশন
+  let banglaDay = engDate - 13;
+  let banglaMonth = engMonth;
+  let banglaYear = engYear - 593;
+
+  if (banglaDay <= 0) {
+    banglaMonth -= 1;
+    if (banglaMonth < 0) {
+      banglaMonth = 11;
+      banglaYear -= 1;
+    }
+    banglaDay = monthDays[banglaMonth] + banglaDay;
+  }
+
+  // ফাল্গুন লিপ ইয়ার ঠিক করা
+  if (banglaMonth === 11) { 
+    const isLeap = ((engYear % 400 === 0) || (engYear % 4 === 0 && engYear % 100 !== 0));
+    if (isLeap && banglaDay === 30) {
+      banglaDay = 30; // লিপ ইয়ার হলে ফাল্গুন ৩০ দিন
+    }
+  }
+
+  const banglaDate = `${engToBanglaNumber(banglaDay)} ${banglaMonths[banglaMonth]}, ${engToBanglaNumber(banglaYear)} (${banglaWeekdays[now.day()]})`;
 
   // কেপশন
   const caption = `
