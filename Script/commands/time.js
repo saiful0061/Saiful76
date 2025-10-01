@@ -2,10 +2,10 @@ const moment = require("moment-timezone");
 
 module.exports.config = {
   name: "time",
-  version: "4.1.0",
+  version: "4.3.0",
   hasPermssion: 0,
   credits: "Mohammad Akash + Saiful Edit",
-  description: "Displays current time, Bangla date and bot runtime with caption.",
+  description: "Displays current time, Bangla date, bot uptime, and important days.",
   commandCategory: "Info",
   cooldowns: 1
 };
@@ -33,8 +33,30 @@ const banglaWeekdays = [
   "বৃহস্পতিবার", "শুক্রবার", "শনিবার"
 ];
 
-// 🔹 মাস অনুযায়ী দিন সংখ্যা
-const monthDays = [31,31,31,31,31,30,30,30,30,30,29,30]; 
+// 🔹 বাংলা মাস শুরু (ইংরেজি মাস অনুযায়ী)
+const banglaMonthStart = [
+  [3,14], // বৈশাখ - এপ্রিল 14
+  [4,15], // জ্যৈষ্ঠ - মে 15
+  [5,15], // আষাঢ় - জুন 15
+  [6,16], // শ্রাবণ - জুলাই 16
+  [7,17], // ভাদ্র - আগস্ট 17
+  [8,17], // আশ্বিন - সেপ্টেম্বর 17
+  [9,17], // কার্তিক - অক্টোবর 17
+  [10,16],// অগ্রহায়ণ - নভেম্বর 16
+  [11,16],// পৌষ - ডিসেম্বর 16
+  [0,15], // মাঘ - জানুয়ারি 15
+  [1,13], // ফাল্গুন - ফেব্রুয়ারি 13/14
+  [2,15]  // চৈত্র - মার্চ 15
+];
+
+// 🔹 গুরুত্বপূর্ণ দিন
+const importantDays = [
+  { name: "শুক্রবার", check: (date) => date.day() === 5 },
+  { name: "ঈদুল ফিতর", check: (date) => date.format("MM-DD") === "04-21" }, // উদাহরণ
+  { name: "ঈদুল আযহা", check: (date) => date.format("MM-DD") === "06-28" },
+  { name: "মাহে রমজান শুরু", check: (date) => date.format("MM-DD") === "03-11" },
+  { name: "মাহে রমজান শেষ", check: (date) => date.format("MM-DD") === "04-10" }
+];
 
 module.exports.run = async function({ api, event }) {
   const { threadID } = event;
@@ -55,54 +77,33 @@ module.exports.run = async function({ api, event }) {
   const engMonth = now.month(); // 0–11
   const engYear = now.year();
 
-  // বাংলা তারিখ ক্যালকুলেশন
+  // বাংলা বছর
   let banglaYear = engYear - 593;
-  let banglaMonth, banglaDay;
+  if (engMonth < 3 || (engMonth === 3 && engDate < 14)) banglaYear -= 1;
 
-  // মাস রূপান্তর (এপ্রিল 14 থেকে বৈশাখ শুরু)
-  if (engMonth < 3 || (engMonth === 3 && engDate < 14)) {
-    banglaYear -= 1;
-  }
-
-  // ইংরেজি মাসের ভিত্তিতে বাংলা মাস নির্ধারণ
-  const banglaMonthStart = [
-    [3,14], // বৈশাখ - এপ্রিল 14
-    [4,15], // জ্যৈষ্ঠ - মে 15
-    [5,15], // আষাঢ় - জুন 15
-    [6,16], // শ্রাবণ - জুলাই 16
-    [7,17], // ভাদ্র - আগস্ট 17
-    [8,17], // আশ্বিন - সেপ্টেম্বর 17
-    [9,17], // কার্তিক - অক্টোবর 17
-    [10,16],// অগ্রহায়ণ - নভেম্বর 16
-    [11,16],// পৌষ - ডিসেম্বর 16
-    [0,15], // মাঘ - জানুয়ারি 15
-    [1,13], // ফাল্গুন - ফেব্রুয়ারি 13/14
-    [2,15]  // চৈত্র - মার্চ 15
-  ];
-
-  // বাংলা মাস ঠিক করা
+  // বাংলা মাস নির্ধারণ
+  let banglaMonth = 11; // ডিফল্ট চৈত্র
   for (let i = 0; i < 12; i++) {
     let [m, d] = banglaMonthStart[i];
-    if ((engMonth > m) || (engMonth === m && engDate >= d)) {
-      banglaMonth = i;
-    }
+    if ((engMonth > m) || (engMonth === m && engDate >= d)) banglaMonth = i;
   }
-  if (banglaMonth === undefined) banglaMonth = 11;
 
-  // দিন ক্যালকুলেশন
+  // বাংলা দিনের হিসাব
   let [startMonth, startDate] = banglaMonthStart[banglaMonth];
   let start = moment(`${engYear}-${startMonth+1}-${startDate}`, "YYYY-M-D").tz("Asia/Dhaka");
-  banglaDay = now.diff(start, "days") + 1;
+  let banglaDay = now.diff(start, "days") + 1;
 
-  // ফাল্গুন লিপ ইয়ার ঠিক করা
-  if (banglaMonth === 11) {
+  // ফাল্গুন লিপ ইয়ার চেক
+  if (banglaMonth === 10) { // ফাল্গুন
     const isLeap = ((engYear % 400 === 0) || (engYear % 4 === 0 && engYear % 100 !== 0));
-    if (isLeap && banglaDay === 30) {
-      banglaDay = 30;
-    }
+    if (isLeap && banglaDay > 29) banglaDay = 30;
   }
 
   const banglaDate = `${engToBanglaNumber(banglaDay)} ${banglaMonths[banglaMonth]}, ${engToBanglaNumber(banglaYear)} (${banglaWeekdays[now.day()]})`;
+
+  // আজকের গুরুত্বপূর্ণ দিন
+  let todayImportant = importantDays.filter(d => d.check(now)).map(d => d.name).join(", ");
+  if (!todayImportant) todayImportant = "কোনও বিশেষ দিন নেই";
 
   // কেপশন
   const caption = `
@@ -120,6 +121,7 @@ module.exports.run = async function({ api, event }) {
 🕒 সময়        : ${time}
 📅 তারিখ      : ${date}
 🗓️ বাংলা তারিখ : ${banglaDate}
+🗓️ আজকের বিশেষ দিন : ${todayImportant}
 ⏳ আপটাইম     : ${engToBanglaNumber(hours)} ঘন্টা, ${engToBanglaNumber(minutes)} মিনিট, ${engToBanglaNumber(seconds)} সেকেন্ড
 
 ━━━━━━━━━━━━━━━━━━━━
